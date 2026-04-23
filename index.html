@@ -1,587 +1,402 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Image ↔ PDF / PDF → Word Converter</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image to PDF and PDF to Word</title>
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: rgba(255, 255, 255, 0.08);
-      --panel-strong: rgba(255, 255, 255, 0.12);
-      --border: rgba(255, 255, 255, 0.15);
-      --text: #ecf1ff;
-      --muted: #a9b4d0;
-      --primary: #6ea8fe;
-      --primary-2: #4b7bec;
-      --danger: #ff6b6b;
-      --success: #2ecc71;
-      --warning: #f7b731;
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-      --radius: 18px;
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --border: #334155;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --error: #dc2626;
+      --warn: #d97706;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html, body {
+    body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0f172a, #111827);
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(110, 168, 254, 0.22), transparent 32%),
-        radial-gradient(circle at top right, rgba(75, 123, 236, 0.18), transparent 26%),
-        linear-gradient(180deg, #0b1020 0%, #0d1327 100%);
-      min-height: 100vh;
-    }
-
-    a {
-      color: inherit;
     }
 
     .container {
-      width: min(1180px, calc(100% - 32px));
-      margin: 32px auto 60px;
+      width: min(1100px, calc(100% - 32px));
+      margin: 32px auto;
     }
 
-    .hero {
-      text-align: center;
-      margin-bottom: 28px;
+    h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
     }
 
-    .hero h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 4vw, 3.25rem);
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-    }
-
-    .hero p {
-      margin: 0 auto;
-      max-width: 850px;
+    .sub {
       color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.7;
+      margin-bottom: 24px;
+      line-height: 1.6;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 22px;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
     .card {
-      background: var(--panel);
+      background: rgba(17, 24, 39, 0.95);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      backdrop-filter: blur(16px);
-      box-shadow: var(--shadow);
-      overflow: hidden;
+      border-radius: 14px;
+      padding: 20px;
     }
 
-    .card-header {
-      padding: 22px 22px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .card-header h2 {
-      margin: 0 0 8px;
-      font-size: 1.25rem;
-    }
-
-    .card-header p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }
-
-    .card-body {
-      padding: 22px;
-    }
-
-    .section-block + .section-block {
-      margin-top: 18px;
-    }
-
-    .label {
-      display: block;
+    .card h2 {
+      margin-top: 0;
       margin-bottom: 10px;
-      font-size: 0.92rem;
-      color: #d6def3;
-      font-weight: 600;
     }
 
-    .drop-zone {
-      position: relative;
-      border: 1.5px dashed rgba(255, 255, 255, 0.22);
-      border-radius: 16px;
-      padding: 22px;
-      min-height: 140px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.035);
-      transition: 180ms ease;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .drop-zone:hover,
-    .drop-zone.dragover {
-      border-color: var(--primary);
-      background: rgba(110, 168, 254, 0.08);
-      transform: translateY(-1px);
-    }
-
-    .drop-zone input {
-      display: none;
-    }
-
-    .drop-zone strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 1rem;
-    }
-
-    .drop-zone span {
+    .help {
       color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .controls.two {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
     }
 
     .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      margin-bottom: 14px;
     }
 
-    select,
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    input[type="file"],
+    input[type="text"],
     input[type="number"],
-    input[type="text"] {
-      appearance: none;
+    select {
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: rgba(255, 255, 255, 0.06);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
       color: var(--text);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font: inherit;
-      outline: none;
+      font-size: 0.95rem;
     }
 
-    select:focus,
-    input[type="number"]:focus,
-    input[type="text"]:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.15);
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    .actions {
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     button {
       border: 0;
-      border-radius: 12px;
+      border-radius: 10px;
       padding: 12px 16px;
-      font: inherit;
-      font-weight: 700;
+      font-size: 0.95rem;
+      font-weight: bold;
       cursor: pointer;
-      transition: 160ms ease;
     }
 
-    .btn-primary {
-      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+    .primary {
+      background: var(--primary);
       color: white;
-      box-shadow: 0 10px 22px rgba(78, 125, 236, 0.28);
     }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
+    .primary:hover {
+      background: var(--primary-hover);
     }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+    .secondary {
+      background: #374151;
+      color: white;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .btn-danger {
-      background: rgba(255, 107, 107, 0.12);
-      color: #ffd6d6;
-      border: 1px solid rgba(255, 107, 107, 0.2);
-    }
-
-    .btn-danger:hover {
-      background: rgba(255, 107, 107, 0.18);
+    .danger {
+      background: #7f1d1d;
+      color: white;
     }
 
     .status {
+      margin-top: 14px;
       min-height: 24px;
-      color: var(--muted);
-      font-size: 0.93rem;
       line-height: 1.5;
+      font-size: 0.95rem;
     }
 
-    .status.success {
-      color: #8ff0b8;
-    }
+    .status.success { color: #86efac; }
+    .status.error { color: #fca5a5; }
+    .status.warn { color: #fdba74; }
 
-    .status.error {
-      color: #ffb4b4;
-    }
-
-    .status.warning {
-      color: #ffd48a;
-    }
-
-    .preview-grid {
+    .preview-list {
+      margin-top: 16px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
-    .preview-card {
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.045);
-      border-radius: 14px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .preview-thumb {
-      background: rgba(255, 255, 255, 0.03);
-      aspect-ratio: 4 / 3;
+    .preview-item {
       display: grid;
-      place-items: center;
-      overflow: hidden;
+      grid-template-columns: 100px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 12px;
     }
 
-    .preview-thumb img {
-      width: 100%;
-      height: 100%;
+    .preview-item img {
+      width: 100px;
+      height: 80px;
       object-fit: cover;
+      border-radius: 8px;
       display: block;
-    }
-
-    .preview-meta {
-      padding: 12px;
-      display: grid;
-      gap: 10px;
+      background: #000;
     }
 
     .preview-name {
-      font-size: 0.9rem;
-      line-height: 1.4;
-      color: #eaf0ff;
       word-break: break-word;
+      font-size: 0.95rem;
     }
 
-    .preview-actions {
+    .small-actions {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .preview-actions button {
+    .small-actions button {
       padding: 8px 10px;
-      font-size: 0.84rem;
+      font-size: 0.85rem;
+    }
+
+    .meta-box {
+      margin-top: 14px;
+      padding: 12px;
       border-radius: 10px;
-    }
-
-    .empty {
-      border: 1px dashed rgba(255, 255, 255, 0.14);
-      border-radius: 14px;
-      padding: 18px;
+      background: #0b1220;
+      border: 1px solid var(--border);
       color: var(--muted);
-      background: rgba(255, 255, 255, 0.03);
-      text-align: center;
+      line-height: 1.6;
     }
 
-    .small-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.87rem;
-      line-height: 1.55;
-    }
-
-    .footer-note {
-      margin-top: 26px;
-      text-align: center;
+    .note {
+      margin-top: 24px;
       color: var(--muted);
       line-height: 1.7;
       font-size: 0.92rem;
     }
 
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.82rem;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #dfe7fb;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin: 4px 8px 0 0;
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    @media (max-width: 920px) {
-      .grid {
+    @media (max-width: 900px) {
+      .grid, .row, .row-3 {
         grid-template-columns: 1fr;
       }
 
-      .controls {
+      .preview-item {
         grid-template-columns: 1fr;
       }
 
-      .controls.two {
-        grid-template-columns: 1fr;
+      .preview-item img {
+        width: 100%;
+        height: 180px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <section class="hero">
-      <h1>Image to PDF & PDF to Word</h1>
-      <p>
-        A clean browser-based converter for turning multiple images into one PDF,
-        and converting text-based PDF files into Word documents. No server needed.
-      </p>
-    </section>
+    <h1>Image to PDF / PDF to Word</h1>
+    <div class="sub">
+      Upload images to make a PDF, or upload a PDF to extract text into a Word file.
+    </div>
 
     <div class="grid">
       <!-- IMAGE TO PDF -->
-      <section class="card">
-        <div class="card-header">
-          <h2>Images → PDF</h2>
-          <p>
-            Upload one or more images, arrange their order, choose page settings,
-            then download a single PDF.
-          </p>
+      <div class="card">
+        <h2>Images → PDF</h2>
+        <div class="help">
+          Choose one or more photos. You can reorder them before creating the PDF.
         </div>
 
-        <div class="card-body">
-          <div class="section-block">
-            <label class="label">Add images</label>
-            <label class="drop-zone" id="imageDropZone">
-              <input type="file" id="imageInput" accept="image/*" multiple />
-              <div>
-                <strong>Click or drag images here</strong>
-                <span>Supports JPG, PNG, WEBP, and other browser-readable image formats.</span>
-              </div>
-            </label>
+        <div class="field">
+          <label for="imageInput">Select images</label>
+          <input id="imageInput" type="file" accept="image/*" multiple />
+        </div>
+
+        <div class="row-3">
+          <div class="field">
+            <label for="pageFormat">Page size</label>
+            <select id="pageFormat">
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+            </select>
           </div>
-
-          <div class="section-block">
-            <div class="controls">
-              <div class="field">
-                <label class="label" for="pageFormat">Page size</label>
-                <select id="pageFormat">
-                  <option value="a4">A4</option>
-                  <option value="letter">Letter</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label class="label" for="pageOrientation">Orientation</label>
-                <select id="pageOrientation">
-                  <option value="auto">Auto</option>
-                  <option value="portrait">Portrait</option>
-                  <option value="landscape">Landscape</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label class="label" for="pageMargin">Margin (mm)</label>
-                <input type="number" id="pageMargin" min="0" max="40" step="1" value="10" />
-              </div>
-            </div>
+          <div class="field">
+            <label for="pageOrientation">Orientation</label>
+            <select id="pageOrientation">
+              <option value="auto">Auto</option>
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
           </div>
-
-          <div class="section-block">
-            <div class="actions">
-              <button class="btn-primary" id="convertImagesBtn">Download PDF</button>
-              <button class="btn-secondary" id="clearImagesBtn" type="button">Clear images</button>
-            </div>
-            <div class="small-note">
-              Tip: use the move buttons on each image card to change page order.
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div id="imageStatus" class="status"></div>
-          </div>
-
-          <div class="section-block">
-            <div id="imagePreviewWrap">
-              <div class="empty">No images added yet.</div>
-            </div>
+          <div class="field">
+            <label for="pageMargin">Margin (mm)</label>
+            <input id="pageMargin" type="number" min="0" max="40" value="10" />
           </div>
         </div>
-      </section>
+
+        <div class="buttons">
+          <button class="primary" id="createPdfBtn" type="button">Create PDF</button>
+          <button class="secondary" id="clearImagesBtn" type="button">Clear Images</button>
+        </div>
+
+        <div id="imageStatus" class="status"></div>
+        <div id="imagePreview" class="preview-list"></div>
+      </div>
 
       <!-- PDF TO WORD -->
-      <section class="card">
-        <div class="card-header">
-          <h2>PDF → Word</h2>
-          <p>
-            Upload a PDF and export its extracted text into a Word <span class="mono">.docx</span> file.
-          </p>
+      <div class="card">
+        <h2>PDF → Word</h2>
+        <div class="help">
+          Best for text-based PDFs. Scanned PDFs usually need OCR to become editable Word documents.
         </div>
 
-        <div class="card-body">
-          <div class="section-block">
-            <label class="label">Choose PDF</label>
-            <label class="drop-zone" id="pdfDropZone">
-              <input type="file" id="pdfInput" accept="application/pdf" />
-              <div>
-                <strong>Click or drag a PDF here</strong>
-                <span>Best for text-based PDFs. Scanned PDFs usually need OCR to become editable text.</span>
-              </div>
-            </label>
+        <div class="field">
+          <label for="pdfInput">Select PDF</label>
+          <input id="pdfInput" type="file" accept=".pdf,application/pdf" />
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="wordFileName">Output file name</label>
+            <input id="wordFileName" type="text" value="converted-document" />
           </div>
-
-          <div class="section-block">
-            <div class="controls two">
-              <div class="field">
-                <label class="label" for="wordFileName">Output file name</label>
-                <input type="text" id="wordFileName" value="converted-document" />
-              </div>
-
-              <div class="field">
-                <label class="label" for="pageBreaks">
-                  Keep PDF page breaks in Word
-                </label>
-                <select id="pageBreaks">
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div class="actions">
-              <button class="btn-primary" id="convertPdfBtn">Download Word File</button>
-              <button class="btn-secondary" id="clearPdfBtn" type="button">Clear PDF</button>
-            </div>
-            <div class="small-note">
-              This version converts extracted PDF text into Word paragraphs.
-              It does not fully preserve original PDF layout, design, or scanned-image pages.
-            </div>
-          </div>
-
-          <div class="section-block">
-            <div id="pdfStatus" class="status"></div>
-          </div>
-
-          <div class="section-block">
-            <div id="pdfMeta" class="empty">No PDF selected yet.</div>
+          <div class="field">
+            <label for="keepPageBreaks">Keep page breaks</label>
+            <select id="keepPageBreaks">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
           </div>
         </div>
-      </section>
+
+        <div class="buttons">
+          <button class="primary" id="createWordBtn" type="button">Create Word File</button>
+          <button class="secondary" id="clearPdfBtn" type="button">Clear PDF</button>
+        </div>
+
+        <div id="pdfStatus" class="status"></div>
+        <div id="pdfMeta" class="meta-box">No PDF selected yet.</div>
+      </div>
     </div>
 
-    <div class="footer-note">
-      <span class="tag">Client-side only</span>
-      <span class="tag">No upload server</span>
-      <span class="tag">Fast for normal files</span>
+    <div class="note">
+      This version is intentionally simple and robust. If one library fails to load, you will see a clear error message instead of dead upload controls.
     </div>
   </div>
 
-  <!-- jsPDF -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
-  <!-- PDF.js -->
+  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <!-- docx -->
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
   <script>
     (() => {
       "use strict";
 
-      // Configure PDF.js worker
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const $ = (id) => document.getElementById(id);
 
-      /** -----------------------------
-       * Utilities
-       * ----------------------------- */
-      const $ = (selector) => document.querySelector(selector);
+      const imageInput = $("imageInput");
+      const createPdfBtn = $("createPdfBtn");
+      const clearImagesBtn = $("clearImagesBtn");
+      const imageStatus = $("imageStatus");
+      const imagePreview = $("imagePreview");
+      const pageFormat = $("pageFormat");
+      const pageOrientation = $("pageOrientation");
+      const pageMargin = $("pageMargin");
+
+      const pdfInput = $("pdfInput");
+      const createWordBtn = $("createWordBtn");
+      const clearPdfBtn = $("clearPdfBtn");
+      const pdfStatus = $("pdfStatus");
+      const pdfMeta = $("pdfMeta");
+      const wordFileName = $("wordFileName");
+      const keepPageBreaks = $("keepPageBreaks");
+
+      const state = {
+        images: [],
+        pdfFile: null,
+      };
 
       function setStatus(el, message, type = "") {
         el.textContent = message;
-        el.className = `status ${type}`.trim();
-      }
-
-      function escapeHtml(text) {
-        return String(text).replace(/[&<>"']/g, (m) => ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;",
-        })[m]);
+        el.className = "status" + (type ? " " + type : "");
       }
 
       function bytesToSize(bytes) {
-        if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+        if (!bytes) return "0 B";
         const units = ["B", "KB", "MB", "GB"];
-        let i = 0;
-        let n = bytes;
-        while (n >= 1024 && i < units.length - 1) {
-          n /= 1024;
-          i++;
+        let size = bytes;
+        let unit = 0;
+        while (size >= 1024 && unit < units.length - 1) {
+          size /= 1024;
+          unit++;
         }
-        return `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+        return size.toFixed(size >= 10 || unit === 0 ? 0 : 1) + " " + units[unit];
       }
 
-      function downloadBlob(blob, fileName) {
+      function safeFileName(name, fallback) {
+        const cleaned = String(name || fallback || "output")
+          .trim()
+          .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
+          .replace(/\.+$/, "");
+        return cleaned || fallback || "output";
+      }
+
+      function removeExt(name) {
+        return String(name).replace(/\.[^.]+$/, "");
+      }
+
+      function uid() {
+        return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+      }
+
+      function downloadBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = fileName;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
 
-      function readFileAsDataURL(file) {
+      function readAsDataURL(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
@@ -590,7 +405,7 @@
         });
       }
 
-      function readFileAsArrayBuffer(file) {
+      function readAsArrayBuffer(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
@@ -599,172 +414,170 @@
         });
       }
 
-      function loadImage(dataUrl) {
+      function loadImage(src) {
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error("Could not load image."));
-          img.src = dataUrl;
+          img.onerror = () => reject(new Error("Image failed to load."));
+          img.src = src;
         });
       }
 
-      function sanitizeFileName(name, fallback) {
-        const cleaned = String(name || fallback || "output")
-          .trim()
-          .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
-          .replace(/\.+$/, "");
-        return cleaned || fallback || "output";
+      function ensureLibrariesForPdf() {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          throw new Error("jsPDF library failed to load.");
+        }
       }
 
-      function removeExtension(fileName) {
-        return fileName.replace(/\.[^.]+$/, "");
+      function ensureLibrariesForWord() {
+        if (!window.pdfjsLib) {
+          throw new Error("PDF.js library failed to load.");
+        }
+        if (!window.docx) {
+          throw new Error("docx library failed to load.");
+        }
       }
 
-      /** -----------------------------
-       * Images -> PDF state
-       * ----------------------------- */
-      const imageState = {
-        files: [],
-      };
-
-      const imageInput = $("#imageInput");
-      const imageDropZone = $("#imageDropZone");
-      const imagePreviewWrap = $("#imagePreviewWrap");
-      const imageStatus = $("#imageStatus");
-      const convertImagesBtn = $("#convertImagesBtn");
-      const clearImagesBtn = $("#clearImagesBtn");
-      const pageFormat = $("#pageFormat");
-      const pageOrientation = $("#pageOrientation");
-      const pageMargin = $("#pageMargin");
-
-      function renderImagePreview() {
-        if (!imageState.files.length) {
-          imagePreviewWrap.innerHTML = `<div class="empty">No images added yet.</div>`;
+      function renderImages() {
+        if (!state.images.length) {
+          imagePreview.innerHTML = "";
           return;
         }
 
-        imagePreviewWrap.innerHTML = `
-          <div class="preview-grid">
-            ${imageState.files.map((item, index) => `
-              <div class="preview-card">
-                <div class="preview-thumb">
-                  <img src="${item.url}" alt="${escapeHtml(item.file.name)}" />
-                </div>
-                <div class="preview-meta">
-                  <div class="preview-name">
-                    <strong>#${index + 1}</strong> — ${escapeHtml(item.file.name)}
-                  </div>
-                  <div class="preview-actions">
-                    <button class="btn-secondary" data-action="up" data-id="${item.id}" ${index === 0 ? "disabled" : ""}>↑ Move up</button>
-                    <button class="btn-secondary" data-action="down" data-id="${item.id}" ${index === imageState.files.length - 1 ? "disabled" : ""}>↓ Move down</button>
-                    <button class="btn-danger" data-action="remove" data-id="${item.id}">Remove</button>
-                  </div>
-                </div>
-              </div>
-            `).join("")}
+        imagePreview.innerHTML = state.images.map((item, index) => `
+          <div class="preview-item">
+            <img src="${item.url}" alt="preview" />
+            <div class="preview-name">
+              <div><strong>${index + 1}. ${escapeHtml(item.file.name)}</strong></div>
+              <div style="color:#94a3b8; margin-top:6px;">${bytesToSize(item.file.size)}</div>
+            </div>
+            <div class="small-actions">
+              <button class="secondary" data-action="up" data-id="${item.id}" ${index === 0 ? "disabled" : ""}>Up</button>
+              <button class="secondary" data-action="down" data-id="${item.id}" ${index === state.images.length - 1 ? "disabled" : ""}>Down</button>
+              <button class="danger" data-action="remove" data-id="${item.id}">Remove</button>
+            </div>
           </div>
-        `;
+        `).join("");
       }
 
-      function addImages(files) {
-        const accepted = [...files].filter((file) => file.type.startsWith("image/"));
+      function escapeHtml(text) {
+        return String(text).replace(/[&<>"']/g, (m) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#039;"
+        }[m]));
+      }
 
-        if (!accepted.length) {
-          setStatus(imageStatus, "Please choose valid image files.", "error");
+      imageInput.addEventListener("change", () => {
+        const files = Array.from(imageInput.files || []).filter(file => file.type.startsWith("image/"));
+
+        if (!files.length) {
+          setStatus(imageStatus, "No valid image files selected.", "error");
           return;
         }
 
-        const newItems = accepted.map((file) => ({
-          id: crypto.randomUUID(),
+        const items = files.map(file => ({
+          id: uid(),
           file,
-          url: URL.createObjectURL(file),
+          url: URL.createObjectURL(file)
         }));
 
-        imageState.files.push(...newItems);
-        renderImagePreview();
-        setStatus(imageStatus, `${accepted.length} image(s) added.`, "success");
-      }
+        state.images.push(...items);
+        renderImages();
+        setStatus(imageStatus, files.length + " image(s) added.", "success");
 
-      function clearImages() {
-        imageState.files.forEach((item) => URL.revokeObjectURL(item.url));
-        imageState.files = [];
-        renderImagePreview();
-        setStatus(imageStatus, "Image list cleared.");
-      }
+        imageInput.value = "";
+      });
 
-      function moveImage(id, direction) {
-        const idx = imageState.files.findIndex((item) => item.id === id);
-        if (idx === -1) return;
+      imagePreview.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action][data-id]");
+        if (!btn) return;
 
-        const target = direction === "up" ? idx - 1 : idx + 1;
-        if (target < 0 || target >= imageState.files.length) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const index = state.images.findIndex(item => item.id === id);
+        if (index === -1) return;
 
-        [imageState.files[idx], imageState.files[target]] =
-          [imageState.files[target], imageState.files[idx]];
+        if (action === "remove") {
+          URL.revokeObjectURL(state.images[index].url);
+          state.images.splice(index, 1);
+        } else if (action === "up" && index > 0) {
+          [state.images[index - 1], state.images[index]] = [state.images[index], state.images[index - 1]];
+        } else if (action === "down" && index < state.images.length - 1) {
+          [state.images[index], state.images[index + 1]] = [state.images[index + 1], state.images[index]];
+        }
 
-        renderImagePreview();
-      }
+        renderImages();
+      });
+
+      clearImagesBtn.addEventListener("click", () => {
+        for (const item of state.images) {
+          URL.revokeObjectURL(item.url);
+        }
+        state.images = [];
+        renderImages();
+        setStatus(imageStatus, "Images cleared.");
+      });
 
       function getPageSizeMm(format, orientation) {
-        const presets = {
-          a4: { portrait: [210, 297], landscape: [297, 210] },
-          letter: { portrait: [215.9, 279.4], landscape: [279.4, 215.9] },
+        const sizes = {
+          a4: {
+            portrait: [210, 297],
+            landscape: [297, 210]
+          },
+          letter: {
+            portrait: [215.9, 279.4],
+            landscape: [279.4, 215.9]
+          }
         };
-        return presets[format][orientation];
+        return sizes[format][orientation];
       }
 
-      function getEffectiveOrientation(imgWidth, imgHeight, selectedOrientation) {
-        if (selectedOrientation === "portrait" || selectedOrientation === "landscape") {
-          return selectedOrientation;
-        }
-        return imgWidth >= imgHeight ? "landscape" : "portrait";
+      function effectiveOrientation(img, selected) {
+        if (selected === "portrait" || selected === "landscape") return selected;
+        return img.naturalWidth > img.naturalHeight ? "landscape" : "portrait";
       }
 
-      async function convertImagesToPdf() {
-        if (!imageState.files.length) {
-          setStatus(imageStatus, "Add at least one image first.", "error");
-          return;
-        }
-
-        const margin = Math.max(0, Math.min(40, Number(pageMargin.value) || 0));
-        const format = pageFormat.value;
-        const chosenOrientation = pageOrientation.value;
-
-        convertImagesBtn.disabled = true;
-        setStatus(imageStatus, "Creating PDF...", "warning");
-
+      createPdfBtn.addEventListener("click", async () => {
         try {
+          ensureLibrariesForPdf();
+
+          if (!state.images.length) {
+            setStatus(imageStatus, "Please upload at least one image.", "error");
+            return;
+          }
+
+          createPdfBtn.disabled = true;
+          setStatus(imageStatus, "Creating PDF...", "warn");
+
           const { jsPDF } = window.jspdf;
+          const margin = Math.max(0, Math.min(40, Number(pageMargin.value) || 0));
+          const format = pageFormat.value;
+          const selectedOrientation = pageOrientation.value;
 
           let doc = null;
 
-          for (let i = 0; i < imageState.files.length; i++) {
-            const item = imageState.files[i];
-            const dataUrl = await readFileAsDataURL(item.file);
+          for (let i = 0; i < state.images.length; i++) {
+            const item = state.images[i];
+            const dataUrl = await readAsDataURL(item.file);
             const img = await loadImage(dataUrl);
-
-            const effectiveOrientation = getEffectiveOrientation(
-              img.naturalWidth,
-              img.naturalHeight,
-              chosenOrientation
-            );
-
-            const [pageW, pageH] = getPageSizeMm(format, effectiveOrientation);
+            const orient = effectiveOrientation(img, selectedOrientation);
+            const [pageW, pageH] = getPageSizeMm(format, orient);
 
             if (!doc) {
               doc = new jsPDF({
-                orientation: effectiveOrientation === "portrait" ? "p" : "l",
+                orientation: orient === "portrait" ? "p" : "l",
                 unit: "mm",
-                format,
-                compress: true,
+                format: format
               });
             } else {
-              doc.addPage(format, effectiveOrientation === "portrait" ? "p" : "l");
+              doc.addPage(format, orient === "portrait" ? "p" : "l");
             }
 
             const maxW = pageW - margin * 2;
             const maxH = pageH - margin * 2;
-
             const imgRatio = img.naturalWidth / img.naturalHeight;
             const boxRatio = maxW / maxH;
 
@@ -782,209 +595,111 @@
             const x = (pageW - renderW) / 2;
             const y = (pageH - renderH) / 2;
 
-            const mime = item.file.type || "image/jpeg";
-            const formatHint = mime.includes("png")
-              ? "PNG"
-              : mime.includes("webp")
-                ? "WEBP"
-                : "JPEG";
+            const lowerType = (item.file.type || "").toLowerCase();
+            const imageFormat =
+              lowerType.includes("png") ? "PNG" :
+              lowerType.includes("webp") ? "WEBP" :
+              "JPEG";
 
-            doc.addImage(dataUrl, formatHint, x, y, renderW, renderH, undefined, "FAST");
+            doc.addImage(dataUrl, imageFormat, x, y, renderW, renderH);
           }
 
-          const fileName = `images-to-pdf-${Date.now()}.pdf`;
-          doc.save(fileName);
-          setStatus(imageStatus, `Done — downloaded ${fileName}`, "success");
-        } catch (error) {
-          console.error(error);
-          setStatus(
-            imageStatus,
-            "Failed to create PDF. Try different images or a smaller batch.",
-            "error"
-          );
+          doc.save("images-to-pdf.pdf");
+          setStatus(imageStatus, "PDF downloaded successfully.", "success");
+        } catch (err) {
+          console.error(err);
+          setStatus(imageStatus, err.message || "Failed to create PDF.", "error");
         } finally {
-          convertImagesBtn.disabled = false;
+          createPdfBtn.disabled = false;
         }
-      }
-
-      imageDropZone.addEventListener("click", (e) => {
-        if (e.target.closest("button")) return;
-        imageInput.click();
       });
 
-      imageInput.addEventListener("change", (e) => {
-        addImages(e.target.files || []);
-        imageInput.value = "";
-      });
+      pdfInput.addEventListener("change", () => {
+        const file = (pdfInput.files || [])[0];
 
-      ["dragenter", "dragover"].forEach((eventName) => {
-        imageDropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          imageDropZone.classList.add("dragover");
-        });
-      });
-
-      ["dragleave", "drop"].forEach((eventName) => {
-        imageDropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          imageDropZone.classList.remove("dragover");
-        });
-      });
-
-      imageDropZone.addEventListener("drop", (e) => {
-        addImages(e.dataTransfer?.files || []);
-      });
-
-      imagePreviewWrap.addEventListener("click", (e) => {
-        const button = e.target.closest("button[data-action][data-id]");
-        if (!button) return;
-
-        const { action, id } = button.dataset;
-
-        if (action === "remove") {
-          const index = imageState.files.findIndex((item) => item.id === id);
-          if (index >= 0) {
-            URL.revokeObjectURL(imageState.files[index].url);
-            imageState.files.splice(index, 1);
-            renderImagePreview();
-            setStatus(imageStatus, "Image removed.");
-          }
+        if (!file) {
+          setStatus(pdfStatus, "No PDF selected.", "error");
           return;
         }
 
-        if (action === "up") moveImage(id, "up");
-        if (action === "down") moveImage(id, "down");
-      });
-
-      convertImagesBtn.addEventListener("click", convertImagesToPdf);
-      clearImagesBtn.addEventListener("click", clearImages);
-
-      /** -----------------------------
-       * PDF -> Word state
-       * ----------------------------- */
-      let selectedPdfFile = null;
-
-      const pdfInput = $("#pdfInput");
-      const pdfDropZone = $("#pdfDropZone");
-      const pdfStatus = $("#pdfStatus");
-      const pdfMeta = $("#pdfMeta");
-      const convertPdfBtn = $("#convertPdfBtn");
-      const clearPdfBtn = $("#clearPdfBtn");
-      const wordFileName = $("#wordFileName");
-      const pageBreaks = $("#pageBreaks");
-
-      function renderPdfMeta() {
-        if (!selectedPdfFile) {
-          pdfMeta.className = "empty";
-          pdfMeta.textContent = "No PDF selected yet.";
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        if (!isPdf) {
+          setStatus(pdfStatus, "Please select a valid PDF file.", "error");
           return;
         }
 
-        pdfMeta.className = "empty";
+        state.pdfFile = file;
+        wordFileName.value = safeFileName(removeExt(file.name), "converted-document");
         pdfMeta.innerHTML = `
-          <strong>${escapeHtml(selectedPdfFile.name)}</strong><br />
-          Size: ${bytesToSize(selectedPdfFile.size)}
+          <strong>${escapeHtml(file.name)}</strong><br>
+          Size: ${bytesToSize(file.size)}
         `;
-      }
+        setStatus(pdfStatus, "PDF selected successfully.", "success");
+      });
 
-      function setPdf(file) {
-        if (!file) return;
-
-        if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-          setStatus(pdfStatus, "Please choose a valid PDF file.", "error");
-          return;
-        }
-
-        selectedPdfFile = file;
-        const defaultName = sanitizeFileName(removeExtension(file.name), "converted-document");
-        wordFileName.value = defaultName;
-        renderPdfMeta();
-        setStatus(pdfStatus, "PDF selected.", "success");
-      }
-
-      function clearPdf() {
-        selectedPdfFile = null;
+      clearPdfBtn.addEventListener("click", () => {
+        state.pdfFile = null;
         pdfInput.value = "";
-        renderPdfMeta();
+        pdfMeta.textContent = "No PDF selected yet.";
         setStatus(pdfStatus, "PDF cleared.");
-      }
+      });
 
-      function groupTextItemsIntoLines(items) {
-        // Sort top-to-bottom, then left-to-right
+      function groupLines(items) {
         const sorted = [...items].sort((a, b) => {
           const ay = a.transform[5];
           const by = b.transform[5];
           const ax = a.transform[4];
           const bx = b.transform[4];
-
           if (Math.abs(ay - by) > 2) return by - ay;
           return ax - bx;
         });
 
         const lines = [];
-        let currentLine = [];
+        let current = [];
         let currentY = null;
 
         for (const item of sorted) {
           const y = item.transform[5];
-
           if (currentY === null || Math.abs(currentY - y) <= 2) {
-            currentLine.push(item);
+            current.push(item);
             currentY = currentY === null ? y : (currentY + y) / 2;
           } else {
-            lines.push(currentLine);
-            currentLine = [item];
+            lines.push(current);
+            current = [item];
             currentY = y;
           }
         }
 
-        if (currentLine.length) lines.push(currentLine);
+        if (current.length) lines.push(current);
 
-        return lines.map((line) => {
-          const pieces = line
+        return lines.map(line =>
+          line
             .sort((a, b) => a.transform[4] - b.transform[4])
-            .map((piece) => piece.str || "")
-            .filter(Boolean);
-
-          // Gentle space normalization for readable paragraphs
-          return pieces
+            .map(x => x.str || "")
             .join(" ")
             .replace(/\s+/g, " ")
             .replace(/\s([,.;:!?])/g, "$1")
-            .trim();
-        }).filter(Boolean);
+            .trim()
+        ).filter(Boolean);
       }
 
-      async function extractPdfPagesAsText(file) {
-        const buffer = await readFileAsArrayBuffer(file);
-        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-
-        const pages = [];
-
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-          const page = await pdf.getPage(pageNumber);
-          const textContent = await page.getTextContent();
-          const lines = groupTextItemsIntoLines(textContent.items || []);
-          pages.push({
-            pageNumber,
-            lines,
-          });
-        }
-
-        return pages;
-      }
-
-      async function convertPdfToWord() {
-        if (!selectedPdfFile) {
-          setStatus(pdfStatus, "Choose a PDF first.", "error");
-          return;
-        }
-
-        convertPdfBtn.disabled = true;
-        setStatus(pdfStatus, "Reading PDF and building Word file...", "warning");
-
+      createWordBtn.addEventListener("click", async () => {
         try {
-          const pages = await extractPdfPagesAsText(selectedPdfFile);
+          ensureLibrariesForWord();
+
+          if (!state.pdfFile) {
+            setStatus(pdfStatus, "Please upload a PDF first.", "error");
+            return;
+          }
+
+          createWordBtn.disabled = true;
+          setStatus(pdfStatus, "Reading PDF and creating Word file...", "warn");
+
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+          const buffer = await readAsArrayBuffer(state.pdfFile);
+          const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
 
           const {
             Document,
@@ -992,121 +707,79 @@
             Paragraph,
             TextRun,
             HeadingLevel,
-            PageBreak,
+            PageBreak
           } = window.docx;
 
           const children = [];
+          let emptyPages = 0;
 
-          pages.forEach((page, pageIndex) => {
-            if (page.lines.length) {
+          for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+            const page = await pdf.getPage(pageNo);
+            const textContent = await page.getTextContent();
+            const lines = groupLines(textContent.items || []);
+
+            children.push(
+              new Paragraph({
+                text: "Page " + pageNo,
+                heading: HeadingLevel.HEADING_2
+              })
+            );
+
+            if (!lines.length) {
+              emptyPages++;
               children.push(
                 new Paragraph({
-                  text: `Page ${page.pageNumber}`,
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { after: 180 },
+                  children: [new TextRun("[No extractable text found on this page]")]
                 })
               );
-
-              for (const line of page.lines) {
+            } else {
+              for (const line of lines) {
                 children.push(
                   new Paragraph({
-                    children: [new TextRun(line)],
-                    spacing: { after: 120 },
+                    children: [new TextRun(line)]
                   })
                 );
               }
-            } else {
-              children.push(
-                new Paragraph({
-                  text: `Page ${page.pageNumber}`,
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { after: 180 },
-                })
-              );
+            }
 
+            if (keepPageBreaks.value === "yes" && pageNo < pdf.numPages) {
               children.push(
                 new Paragraph({
-                  children: [new TextRun("[No extractable text found on this page]")],
-                  spacing: { after: 120 },
+                  children: [new PageBreak()]
                 })
               );
             }
-
-            if (pageBreaks.value === "yes" && pageIndex < pages.length - 1) {
-              children.push(
-                new Paragraph({
-                  children: [new PageBreak()],
-                })
-              );
-            }
-          });
+          }
 
           const doc = new Document({
             sections: [
               {
                 properties: {},
-                children,
-              },
-            ],
+                children
+              }
+            ]
           });
 
           const blob = await Packer.toBlob(doc);
-          const nameBase = sanitizeFileName(wordFileName.value, "converted-document");
-          const outName = `${nameBase}.docx`;
-          downloadBlob(blob, outName);
+          const output = safeFileName(wordFileName.value, "converted-document") + ".docx";
+          downloadBlob(blob, output);
 
-          const noTextPages = pages.filter((p) => p.lines.length === 0).length;
-          if (noTextPages > 0) {
+          if (emptyPages > 0) {
             setStatus(
               pdfStatus,
-              `Done — downloaded ${outName}. ${noTextPages} page(s) had no extractable text.`,
-              "warning"
+              "Word file downloaded. " + emptyPages + " page(s) had no extractable text.",
+              "warn"
             );
           } else {
-            setStatus(pdfStatus, `Done — downloaded ${outName}`, "success");
+            setStatus(pdfStatus, "Word file downloaded successfully.", "success");
           }
-        } catch (error) {
-          console.error(error);
-          setStatus(
-            pdfStatus,
-            "Failed to convert PDF. If this is a scanned PDF, it likely needs OCR.",
-            "error"
-          );
+        } catch (err) {
+          console.error(err);
+          setStatus(pdfStatus, err.message || "Failed to create Word file.", "error");
         } finally {
-          convertPdfBtn.disabled = false;
+          createWordBtn.disabled = false;
         }
-      }
-
-      pdfDropZone.addEventListener("click", () => pdfInput.click());
-
-      pdfInput.addEventListener("change", (e) => {
-        setPdf(e.target.files?.[0] || null);
       });
-
-      ["dragenter", "dragover"].forEach((eventName) => {
-        pdfDropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          pdfDropZone.classList.add("dragover");
-        });
-      });
-
-      ["dragleave", "drop"].forEach((eventName) => {
-        pdfDropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          pdfDropZone.classList.remove("dragover");
-        });
-      });
-
-      pdfDropZone.addEventListener("drop", (e) => {
-        const file = e.dataTransfer?.files?.[0];
-        if (file) setPdf(file);
-      });
-
-      convertPdfBtn.addEventListener("click", convertPdfToWord);
-      clearPdfBtn.addEventListener("click", clearPdf);
-
-      renderImagePreview();
-      renderPdfMeta();
     })();
   </script>
 </body>
