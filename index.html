@@ -1,1 +1,1113 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Image ↔ PDF / PDF → Word Converter</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.12);
+      --border: rgba(255, 255, 255, 0.15);
+      --text: #ecf1ff;
+      --muted: #a9b4d0;
+      --primary: #6ea8fe;
+      --primary-2: #4b7bec;
+      --danger: #ff6b6b;
+      --success: #2ecc71;
+      --warning: #f7b731;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(110, 168, 254, 0.22), transparent 32%),
+        radial-gradient(circle at top right, rgba(75, 123, 236, 0.18), transparent 26%),
+        linear-gradient(180deg, #0b1020 0%, #0d1327 100%);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto 60px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 850px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 22px 22px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card-header h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+    }
+
+    .card-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .card-body {
+      padding: 22px;
+    }
+
+    .section-block + .section-block {
+      margin-top: 18px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #d6def3;
+      font-weight: 600;
+    }
+
+    .drop-zone {
+      position: relative;
+      border: 1.5px dashed rgba(255, 255, 255, 0.22);
+      border-radius: 16px;
+      padding: 22px;
+      min-height: 140px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.035);
+      transition: 180ms ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(110, 168, 254, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .drop-zone input {
+      display: none;
+    }
+
+    .drop-zone strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .drop-zone span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .controls.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      appearance: none;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    select:focus,
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 160ms ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+      color: white;
+      box-shadow: 0 10px 22px rgba(78, 125, 236, 0.28);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-danger {
+      background: rgba(255, 107, 107, 0.12);
+      color: #ffd6d6;
+      border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 107, 107, 0.18);
+    }
+
+    .status {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
+    .status.success {
+      color: #8ff0b8;
+    }
+
+    .status.error {
+      color: #ffb4b4;
+    }
+
+    .status.warning {
+      color: #ffd48a;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px;
+    }
+
+    .preview-card {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.045);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-thumb {
+      background: rgba(255, 255, 255, 0.03);
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .preview-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-meta {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .preview-name {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #eaf0ff;
+      word-break: break-word;
+    }
+
+    .preview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preview-actions button {
+      padding: 8px 10px;
+      font-size: 0.84rem;
+      border-radius: 10px;
+    }
+
+    .empty {
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+      text-align: center;
+    }
+
+    .small-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.87rem;
+      line-height: 1.55;
+    }
+
+    .footer-note {
+      margin-top: 26px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #dfe7fb;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 4px 8px 0 0;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .controls.two {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Image to PDF & PDF to Word</h1>
+      <p>
+        A clean browser-based converter for turning multiple images into one PDF,
+        and converting text-based PDF files into Word documents. No server needed.
+      </p>
+    </section>
+
+    <div class="grid">
+      <!-- IMAGE TO PDF -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Images → PDF</h2>
+          <p>
+            Upload one or more images, arrange their order, choose page settings,
+            then download a single PDF.
+          </p>
+        </div>
+
+        <div class="card-body">
+          <div class="section-block">
+            <label class="label">Add images</label>
+            <label class="drop-zone" id="imageDropZone">
+              <input type="file" id="imageInput" accept="image/*" multiple />
+              <div>
+                <strong>Click or drag images here</strong>
+                <span>Supports JPG, PNG, WEBP, and other browser-readable image formats.</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="section-block">
+            <div class="controls">
+              <div class="field">
+                <label class="label" for="pageFormat">Page size</label>
+                <select id="pageFormat">
+                  <option value="a4">A4</option>
+                  <option value="letter">Letter</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="label" for="pageOrientation">Orientation</label>
+                <select id="pageOrientation">
+                  <option value="auto">Auto</option>
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Landscape</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="label" for="pageMargin">Margin (mm)</label>
+                <input type="number" id="pageMargin" min="0" max="40" step="1" value="10" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="actions">
+              <button class="btn-primary" id="convertImagesBtn">Download PDF</button>
+              <button class="btn-secondary" id="clearImagesBtn" type="button">Clear images</button>
+            </div>
+            <div class="small-note">
+              Tip: use the move buttons on each image card to change page order.
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div id="imageStatus" class="status"></div>
+          </div>
+
+          <div class="section-block">
+            <div id="imagePreviewWrap">
+              <div class="empty">No images added yet.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PDF TO WORD -->
+      <section class="card">
+        <div class="card-header">
+          <h2>PDF → Word</h2>
+          <p>
+            Upload a PDF and export its extracted text into a Word <span class="mono">.docx</span> file.
+          </p>
+        </div>
+
+        <div class="card-body">
+          <div class="section-block">
+            <label class="label">Choose PDF</label>
+            <label class="drop-zone" id="pdfDropZone">
+              <input type="file" id="pdfInput" accept="application/pdf" />
+              <div>
+                <strong>Click or drag a PDF here</strong>
+                <span>Best for text-based PDFs. Scanned PDFs usually need OCR to become editable text.</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="section-block">
+            <div class="controls two">
+              <div class="field">
+                <label class="label" for="wordFileName">Output file name</label>
+                <input type="text" id="wordFileName" value="converted-document" />
+              </div>
+
+              <div class="field">
+                <label class="label" for="pageBreaks">
+                  Keep PDF page breaks in Word
+                </label>
+                <select id="pageBreaks">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="actions">
+              <button class="btn-primary" id="convertPdfBtn">Download Word File</button>
+              <button class="btn-secondary" id="clearPdfBtn" type="button">Clear PDF</button>
+            </div>
+            <div class="small-note">
+              This version converts extracted PDF text into Word paragraphs.
+              It does not fully preserve original PDF layout, design, or scanned-image pages.
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div id="pdfStatus" class="status"></div>
+          </div>
+
+          <div class="section-block">
+            <div id="pdfMeta" class="empty">No PDF selected yet.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer-note">
+      <span class="tag">Client-side only</span>
+      <span class="tag">No upload server</span>
+      <span class="tag">Fast for normal files</span>
+    </div>
+  </div>
+
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- docx -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // Configure PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      /** -----------------------------
+       * Utilities
+       * ----------------------------- */
+      const $ = (selector) => document.querySelector(selector);
+
+      function setStatus(el, message, type = "") {
+        el.textContent = message;
+        el.className = `status ${type}`.trim();
+      }
+
+      function escapeHtml(text) {
+        return String(text).replace(/[&<>"']/g, (m) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[m]);
+      }
+
+      function bytesToSize(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        let i = 0;
+        let n = bytes;
+        while (n >= 1024 && i < units.length - 1) {
+          n /= 1024;
+          i++;
+        }
+        return `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+
+      function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Could not read file."));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Could not read file."));
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      function loadImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("Could not load image."));
+          img.src = dataUrl;
+        });
+      }
+
+      function sanitizeFileName(name, fallback) {
+        const cleaned = String(name || fallback || "output")
+          .trim()
+          .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
+          .replace(/\.+$/, "");
+        return cleaned || fallback || "output";
+      }
+
+      function removeExtension(fileName) {
+        return fileName.replace(/\.[^.]+$/, "");
+      }
+
+      /** -----------------------------
+       * Images -> PDF state
+       * ----------------------------- */
+      const imageState = {
+        files: [],
+      };
+
+      const imageInput = $("#imageInput");
+      const imageDropZone = $("#imageDropZone");
+      const imagePreviewWrap = $("#imagePreviewWrap");
+      const imageStatus = $("#imageStatus");
+      const convertImagesBtn = $("#convertImagesBtn");
+      const clearImagesBtn = $("#clearImagesBtn");
+      const pageFormat = $("#pageFormat");
+      const pageOrientation = $("#pageOrientation");
+      const pageMargin = $("#pageMargin");
+
+      function renderImagePreview() {
+        if (!imageState.files.length) {
+          imagePreviewWrap.innerHTML = `<div class="empty">No images added yet.</div>`;
+          return;
+        }
+
+        imagePreviewWrap.innerHTML = `
+          <div class="preview-grid">
+            ${imageState.files.map((item, index) => `
+              <div class="preview-card">
+                <div class="preview-thumb">
+                  <img src="${item.url}" alt="${escapeHtml(item.file.name)}" />
+                </div>
+                <div class="preview-meta">
+                  <div class="preview-name">
+                    <strong>#${index + 1}</strong> — ${escapeHtml(item.file.name)}
+                  </div>
+                  <div class="preview-actions">
+                    <button class="btn-secondary" data-action="up" data-id="${item.id}" ${index === 0 ? "disabled" : ""}>↑ Move up</button>
+                    <button class="btn-secondary" data-action="down" data-id="${item.id}" ${index === imageState.files.length - 1 ? "disabled" : ""}>↓ Move down</button>
+                    <button class="btn-danger" data-action="remove" data-id="${item.id}">Remove</button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      function addImages(files) {
+        const accepted = [...files].filter((file) => file.type.startsWith("image/"));
+
+        if (!accepted.length) {
+          setStatus(imageStatus, "Please choose valid image files.", "error");
+          return;
+        }
+
+        const newItems = accepted.map((file) => ({
+          id: crypto.randomUUID(),
+          file,
+          url: URL.createObjectURL(file),
+        }));
+
+        imageState.files.push(...newItems);
+        renderImagePreview();
+        setStatus(imageStatus, `${accepted.length} image(s) added.`, "success");
+      }
+
+      function clearImages() {
+        imageState.files.forEach((item) => URL.revokeObjectURL(item.url));
+        imageState.files = [];
+        renderImagePreview();
+        setStatus(imageStatus, "Image list cleared.");
+      }
+
+      function moveImage(id, direction) {
+        const idx = imageState.files.findIndex((item) => item.id === id);
+        if (idx === -1) return;
+
+        const target = direction === "up" ? idx - 1 : idx + 1;
+        if (target < 0 || target >= imageState.files.length) return;
+
+        [imageState.files[idx], imageState.files[target]] =
+          [imageState.files[target], imageState.files[idx]];
+
+        renderImagePreview();
+      }
+
+      function getPageSizeMm(format, orientation) {
+        const presets = {
+          a4: { portrait: [210, 297], landscape: [297, 210] },
+          letter: { portrait: [215.9, 279.4], landscape: [279.4, 215.9] },
+        };
+        return presets[format][orientation];
+      }
+
+      function getEffectiveOrientation(imgWidth, imgHeight, selectedOrientation) {
+        if (selectedOrientation === "portrait" || selectedOrientation === "landscape") {
+          return selectedOrientation;
+        }
+        return imgWidth >= imgHeight ? "landscape" : "portrait";
+      }
+
+      async function convertImagesToPdf() {
+        if (!imageState.files.length) {
+          setStatus(imageStatus, "Add at least one image first.", "error");
+          return;
+        }
+
+        const margin = Math.max(0, Math.min(40, Number(pageMargin.value) || 0));
+        const format = pageFormat.value;
+        const chosenOrientation = pageOrientation.value;
+
+        convertImagesBtn.disabled = true;
+        setStatus(imageStatus, "Creating PDF...", "warning");
+
+        try {
+          const { jsPDF } = window.jspdf;
+
+          let doc = null;
+
+          for (let i = 0; i < imageState.files.length; i++) {
+            const item = imageState.files[i];
+            const dataUrl = await readFileAsDataURL(item.file);
+            const img = await loadImage(dataUrl);
+
+            const effectiveOrientation = getEffectiveOrientation(
+              img.naturalWidth,
+              img.naturalHeight,
+              chosenOrientation
+            );
+
+            const [pageW, pageH] = getPageSizeMm(format, effectiveOrientation);
+
+            if (!doc) {
+              doc = new jsPDF({
+                orientation: effectiveOrientation === "portrait" ? "p" : "l",
+                unit: "mm",
+                format,
+                compress: true,
+              });
+            } else {
+              doc.addPage(format, effectiveOrientation === "portrait" ? "p" : "l");
+            }
+
+            const maxW = pageW - margin * 2;
+            const maxH = pageH - margin * 2;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const boxRatio = maxW / maxH;
+
+            let renderW;
+            let renderH;
+
+            if (imgRatio > boxRatio) {
+              renderW = maxW;
+              renderH = renderW / imgRatio;
+            } else {
+              renderH = maxH;
+              renderW = renderH * imgRatio;
+            }
+
+            const x = (pageW - renderW) / 2;
+            const y = (pageH - renderH) / 2;
+
+            const mime = item.file.type || "image/jpeg";
+            const formatHint = mime.includes("png")
+              ? "PNG"
+              : mime.includes("webp")
+                ? "WEBP"
+                : "JPEG";
+
+            doc.addImage(dataUrl, formatHint, x, y, renderW, renderH, undefined, "FAST");
+          }
+
+          const fileName = `images-to-pdf-${Date.now()}.pdf`;
+          doc.save(fileName);
+          setStatus(imageStatus, `Done — downloaded ${fileName}`, "success");
+        } catch (error) {
+          console.error(error);
+          setStatus(
+            imageStatus,
+            "Failed to create PDF. Try different images or a smaller batch.",
+            "error"
+          );
+        } finally {
+          convertImagesBtn.disabled = false;
+        }
+      }
+
+      imageDropZone.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        imageInput.click();
+      });
+
+      imageInput.addEventListener("change", (e) => {
+        addImages(e.target.files || []);
+        imageInput.value = "";
+      });
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        imageDropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          imageDropZone.classList.add("dragover");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        imageDropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          imageDropZone.classList.remove("dragover");
+        });
+      });
+
+      imageDropZone.addEventListener("drop", (e) => {
+        addImages(e.dataTransfer?.files || []);
+      });
+
+      imagePreviewWrap.addEventListener("click", (e) => {
+        const button = e.target.closest("button[data-action][data-id]");
+        if (!button) return;
+
+        const { action, id } = button.dataset;
+
+        if (action === "remove") {
+          const index = imageState.files.findIndex((item) => item.id === id);
+          if (index >= 0) {
+            URL.revokeObjectURL(imageState.files[index].url);
+            imageState.files.splice(index, 1);
+            renderImagePreview();
+            setStatus(imageStatus, "Image removed.");
+          }
+          return;
+        }
+
+        if (action === "up") moveImage(id, "up");
+        if (action === "down") moveImage(id, "down");
+      });
+
+      convertImagesBtn.addEventListener("click", convertImagesToPdf);
+      clearImagesBtn.addEventListener("click", clearImages);
+
+      /** -----------------------------
+       * PDF -> Word state
+       * ----------------------------- */
+      let selectedPdfFile = null;
+
+      const pdfInput = $("#pdfInput");
+      const pdfDropZone = $("#pdfDropZone");
+      const pdfStatus = $("#pdfStatus");
+      const pdfMeta = $("#pdfMeta");
+      const convertPdfBtn = $("#convertPdfBtn");
+      const clearPdfBtn = $("#clearPdfBtn");
+      const wordFileName = $("#wordFileName");
+      const pageBreaks = $("#pageBreaks");
+
+      function renderPdfMeta() {
+        if (!selectedPdfFile) {
+          pdfMeta.className = "empty";
+          pdfMeta.textContent = "No PDF selected yet.";
+          return;
+        }
+
+        pdfMeta.className = "empty";
+        pdfMeta.innerHTML = `
+          <strong>${escapeHtml(selectedPdfFile.name)}</strong><br />
+          Size: ${bytesToSize(selectedPdfFile.size)}
+        `;
+      }
+
+      function setPdf(file) {
+        if (!file) return;
+
+        if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+          setStatus(pdfStatus, "Please choose a valid PDF file.", "error");
+          return;
+        }
+
+        selectedPdfFile = file;
+        const defaultName = sanitizeFileName(removeExtension(file.name), "converted-document");
+        wordFileName.value = defaultName;
+        renderPdfMeta();
+        setStatus(pdfStatus, "PDF selected.", "success");
+      }
+
+      function clearPdf() {
+        selectedPdfFile = null;
+        pdfInput.value = "";
+        renderPdfMeta();
+        setStatus(pdfStatus, "PDF cleared.");
+      }
+
+      function groupTextItemsIntoLines(items) {
+        // Sort top-to-bottom, then left-to-right
+        const sorted = [...items].sort((a, b) => {
+          const ay = a.transform[5];
+          const by = b.transform[5];
+          const ax = a.transform[4];
+          const bx = b.transform[4];
+
+          if (Math.abs(ay - by) > 2) return by - ay;
+          return ax - bx;
+        });
+
+        const lines = [];
+        let currentLine = [];
+        let currentY = null;
+
+        for (const item of sorted) {
+          const y = item.transform[5];
+
+          if (currentY === null || Math.abs(currentY - y) <= 2) {
+            currentLine.push(item);
+            currentY = currentY === null ? y : (currentY + y) / 2;
+          } else {
+            lines.push(currentLine);
+            currentLine = [item];
+            currentY = y;
+          }
+        }
+
+        if (currentLine.length) lines.push(currentLine);
+
+        return lines.map((line) => {
+          const pieces = line
+            .sort((a, b) => a.transform[4] - b.transform[4])
+            .map((piece) => piece.str || "")
+            .filter(Boolean);
+
+          // Gentle space normalization for readable paragraphs
+          return pieces
+            .join(" ")
+            .replace(/\s+/g, " ")
+            .replace(/\s([,.;:!?])/g, "$1")
+            .trim();
+        }).filter(Boolean);
+      }
+
+      async function extractPdfPagesAsText(file) {
+        const buffer = await readFileAsArrayBuffer(file);
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
+        const pages = [];
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+          const page = await pdf.getPage(pageNumber);
+          const textContent = await page.getTextContent();
+          const lines = groupTextItemsIntoLines(textContent.items || []);
+          pages.push({
+            pageNumber,
+            lines,
+          });
+        }
+
+        return pages;
+      }
+
+      async function convertPdfToWord() {
+        if (!selectedPdfFile) {
+          setStatus(pdfStatus, "Choose a PDF first.", "error");
+          return;
+        }
+
+        convertPdfBtn.disabled = true;
+        setStatus(pdfStatus, "Reading PDF and building Word file...", "warning");
+
+        try {
+          const pages = await extractPdfPagesAsText(selectedPdfFile);
+
+          const {
+            Document,
+            Packer,
+            Paragraph,
+            TextRun,
+            HeadingLevel,
+            PageBreak,
+          } = window.docx;
+
+          const children = [];
+
+          pages.forEach((page, pageIndex) => {
+            if (page.lines.length) {
+              children.push(
+                new Paragraph({
+                  text: `Page ${page.pageNumber}`,
+                  heading: HeadingLevel.HEADING_2,
+                  spacing: { after: 180 },
+                })
+              );
+
+              for (const line of page.lines) {
+                children.push(
+                  new Paragraph({
+                    children: [new TextRun(line)],
+                    spacing: { after: 120 },
+                  })
+                );
+              }
+            } else {
+              children.push(
+                new Paragraph({
+                  text: `Page ${page.pageNumber}`,
+                  heading: HeadingLevel.HEADING_2,
+                  spacing: { after: 180 },
+                })
+              );
+
+              children.push(
+                new Paragraph({
+                  children: [new TextRun("[No extractable text found on this page]")],
+                  spacing: { after: 120 },
+                })
+              );
+            }
+
+            if (pageBreaks.value === "yes" && pageIndex < pages.length - 1) {
+              children.push(
+                new Paragraph({
+                  children: [new PageBreak()],
+                })
+              );
+            }
+          });
+
+          const doc = new Document({
+            sections: [
+              {
+                properties: {},
+                children,
+              },
+            ],
+          });
+
+          const blob = await Packer.toBlob(doc);
+          const nameBase = sanitizeFileName(wordFileName.value, "converted-document");
+          const outName = `${nameBase}.docx`;
+          downloadBlob(blob, outName);
+
+          const noTextPages = pages.filter((p) => p.lines.length === 0).length;
+          if (noTextPages > 0) {
+            setStatus(
+              pdfStatus,
+              `Done — downloaded ${outName}. ${noTextPages} page(s) had no extractable text.`,
+              "warning"
+            );
+          } else {
+            setStatus(pdfStatus, `Done — downloaded ${outName}`, "success");
+          }
+        } catch (error) {
+          console.error(error);
+          setStatus(
+            pdfStatus,
+            "Failed to convert PDF. If this is a scanned PDF, it likely needs OCR.",
+            "error"
+          );
+        } finally {
+          convertPdfBtn.disabled = false;
+        }
+      }
+
+      pdfDropZone.addEventListener("click", () => pdfInput.click());
+
+      pdfInput.addEventListener("change", (e) => {
+        setPdf(e.target.files?.[0] || null);
+      });
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        pdfDropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          pdfDropZone.classList.add("dragover");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        pdfDropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          pdfDropZone.classList.remove("dragover");
+        });
+      });
+
+      pdfDropZone.addEventListener("drop", (e) => {
+        const file = e.dataTransfer?.files?.[0];
+        if (file) setPdf(file);
+      });
+
+      convertPdfBtn.addEventListener("click", convertPdfToWord);
+      clearPdfBtn.addEventListener("click", clearPdf);
+
+      renderImagePreview();
+      renderPdfMeta();
+    })();
+  </script>
+</body>
+</html>
