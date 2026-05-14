@@ -1,963 +1,2457 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hola_Pdf</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>ডিজিটাল সাব-মিটার বিলিং সিস্টেম</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --panel: #111827;
-      --panel-2: #1f2937;
-      --border: #334155;
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
+
+    :root{
+      --primary:#0f766e;
+      --primaryLight:#14b8a6;
+      --secondary:#2563eb;
+      --danger:#dc2626;
+      --bg:#f8fafc;
+      --text:#0f172a;
+      --muted:#64748b;
+      --card:#ffffffcc;
+      --shadow:0 12px 30px rgba(0,0,0,0.08);
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #0f172a, #111827);
-      color: var(--text);
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
 
-    .container {
-      width: min(1120px, calc(100% - 32px));
-      margin: 32px auto;
+    body{
+      font-family:'Hind Siliguri',sans-serif;
+      min-height:100vh;
+      background:
+      radial-gradient(circle at top left,#99f6e4 0%,transparent 25%),
+      radial-gradient(circle at bottom right,#bfdbfe 0%,transparent 25%),
+      linear-gradient(135deg,#ecfeff,#f8fafc);
+
+      color:var(--text);
+      padding:30px 15px;
     }
 
-    h1 { margin: 0 0 10px; }
-
-    .sub, .help, .note {
-      color: var(--muted);
-      line-height: 1.6;
+    .container{
+      max-width:1200px;
+      margin:auto;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+    header{
+      text-align:center;
+      margin-bottom:30px;
     }
 
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
+    header h1{
+      font-size:42px;
+      color:var(--primary);
+      margin-bottom:10px;
     }
 
-    .field { margin-bottom: 14px; }
-
-    .field label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
+    header p{
+      color:#475569;
+      font-size:17px;
     }
 
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
-      font-size: 0.95rem;
+    .card{
+      background:var(--card);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.3);
+      border-radius:24px;
+      padding:28px;
+      margin-bottom:25px;
+      box-shadow:var(--shadow);
     }
 
-    .row, .row-3 {
-      display: grid;
-      gap: 12px;
+    .card h2{
+      color:var(--primary);
+      margin-bottom:20px;
+      font-size:28px;
     }
 
-    .row { grid-template-columns: 1fr 1fr; }
-    .row-3 { grid-template-columns: 1fr 1fr 1fr; }
-
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
+    .meter-box{
+      background:white;
+      border-radius:20px;
+      padding:22px;
+      border:1px solid #e2e8f0;
+      margin-bottom:20px;
+      transition:.3s;
+      position:relative;
+      overflow:hidden;
     }
 
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-weight: bold;
-      cursor: pointer;
+    .meter-box::before{
+      content:"";
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:5px;
+      background:linear-gradient(
+      90deg,
+      var(--primary),
+      var(--primaryLight)
+      );
     }
 
-    .primary {
-      background: var(--primary);
-      color: white;
+    .meter-box:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 25px rgba(15,118,110,.08);
     }
 
-    .primary:hover { background: var(--primary-hover); }
-
-    .secondary {
-      background: #374151;
-      color: white;
+    .meter-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
     }
 
-    .danger {
-      background: #7f1d1d;
-      color: white;
+    .meter-header h3{
+      color:var(--primary);
+      font-size:24px;
     }
 
-    .status {
-      margin-top: 14px;
-      min-height: 24px;
-      line-height: 1.5;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:18px;
     }
 
-    .status.success { color: #86efac; }
-    .status.error { color: #fca5a5; }
-    .status.warn { color: #fdba74; }
-
-    .preview-list {
-      margin-top: 16px;
-      display: grid;
-      gap: 12px;
+    .form-group{
+      display:flex;
+      flex-direction:column;
     }
 
-    .preview-item {
-      display: grid;
-      grid-template-columns: 100px 1fr auto;
-      gap: 12px;
-      align-items: center;
-      background: #0b1220;
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 12px;
+    label{
+      margin-bottom:8px;
+      font-weight:600;
+      color:#334155;
     }
 
-    .preview-item img {
-      width: 100px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
+    input{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid #cbd5e1;
+      font-size:16px;
+      transition:.3s;
     }
 
-    .small-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    input:focus{
+      outline:none;
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(15,118,110,.15);
     }
 
-    .small-actions button {
-      padding: 8px 10px;
-      font-size: 0.85rem;
+    .sub-title{
+      margin-top:18px;
+      margin-bottom:14px;
+      font-size:18px;
+      font-weight:700;
+      color:#334155;
     }
 
-    .meta-box {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 10px;
-      background: #0b1220;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      line-height: 1.6;
+    .sub-meters-wrap{
+      display:grid;
+      grid-template-columns:repeat(
+        auto-fill,
+        minmax(200px,1fr)
+      );
+      gap:16px;
     }
 
-    .note { margin-top: 24px; }
+    .sub-meter-section{
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      border-radius:16px;
+      padding:16px 18px;
+    }
 
-    @media (max-width: 900px) {
-      .grid, .row, .row-3 {
-        grid-template-columns: 1fr;
+    .sub-meter-section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+      padding-bottom:10px;
+      border-bottom:1px solid #e2e8f0;
+    }
+
+    .sub-meter-section-head h4{
+      font-size:17px;
+      color:var(--primary);
+      margin:0;
+      font-weight:700;
+      flex:1;
+    }
+
+    .remove-sub-btn{
+      background:#fee2e2;
+      color:#991b1b;
+      padding:6px 10px;
+      font-size:12px;
+      border-radius:8px;
+      flex-shrink:0;
+    }
+
+    .remove-sub-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .add-sub-btn{
+      margin-top:14px;
+      width:100%;
+      max-width:340px;
+      background:linear-gradient(
+      135deg,
+      #0d9488,
+      #14b8a6
+      );
+      color:#fff;
+    }
+
+    .add-sub-btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .sub-meter-inner{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .btn-area{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:25px;
+    }
+
+    button{
+      border:none;
+      padding:14px 22px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:700;
+      transition:.3s;
+    }
+
+    button:hover{
+      transform:translateY(-2px);
+    }
+
+    button:active{
+      transform:scale(.98);
+    }
+
+    .add-btn{
+      background:linear-gradient(135deg,#2563eb,#3b82f6);
+      color:white;
+    }
+
+    .calculate-btn{
+      background:linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primaryLight)
+      );
+      color:white;
+    }
+
+    .reset-btn{
+      background:#e2e8f0;
+      color:#0f172a;
+    }
+
+    .remove-btn{
+      background:#fee2e2;
+      color:#991b1b;
+      padding:10px 14px;
+      font-size:14px;
+    }
+
+    .warning{
+      display:none;
+      margin-top:18px;
+      background:#fee2e2;
+      color:#991b1b;
+      padding:15px;
+      border-radius:14px;
+      font-weight:700;
+    }
+
+    #resultBox{
+      display:none;
+      margin-top:15px;
+    }
+
+    .table-wrapper{
+      overflow-x:auto;
+      border-radius:18px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th{
+      background:linear-gradient(
+      135deg,
+      #ccfbf1,
+      #f0fdfa
+      );
+
+      color:var(--primary);
+
+      padding:14px;
+      border:1px solid #dbeafe;
+      text-align:left;
+    }
+
+    td{
+      padding:14px;
+      border:1px solid #e2e8f0;
+      background:white;
+    }
+
+    tr:hover td{
+      background:#f8fafc;
+    }
+
+    .right{
+      text-align:right;
+    }
+
+    .positive{
+      color:#15803d;
+      font-weight:700;
+    }
+
+    .negative{
+      color:#dc2626;
+      font-weight:700;
+    }
+
+    .summary-grid{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:15px;
+    }
+
+    .summary-box{
+      background:white;
+      padding:20px;
+      border-radius:18px;
+      border:1px solid #e2e8f0;
+    }
+
+    .summary-box h4{
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .summary-box h3{
+      color:var(--primary);
+      font-size:30px;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      margin-top:30px;
+      font-size:14px;
+    }
+
+    #printGroupedResult{
+      display:none;
+    }
+
+    /* =========================
+    DIGITAL INVOICE
+    ========================= */
+
+    .invoice-wrapper{
+
+      background:white;
+      border:2px solid #0f766e;
+      border-radius:18px;
+
+      padding:24px;
+      margin-bottom:30px;
+
+      page-break-inside:avoid;
+    }
+
+    .invoice-header{
+
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+
+      border-bottom:2px dashed #cbd5e1;
+
+      padding-bottom:18px;
+      margin-bottom:18px;
+    }
+
+    .invoice-header h1{
+
+      color:#0f766e;
+      font-size:28px;
+      margin-bottom:5px;
+    }
+
+    .invoice-header p{
+
+      color:#64748b;
+      font-size:14px;
+    }
+
+    .invoice-meta{
+
+      text-align:right;
+      line-height:1.8;
+      color:#334155;
+    }
+
+    .invoice-info{
+
+      display:grid;
+      grid-template-columns:1fr 1fr;
+
+      gap:15px;
+      margin-bottom:20px;
+    }
+
+    .info-box{
+
+      border:1px solid #e2e8f0;
+      border-radius:14px;
+
+      padding:14px;
+      background:#f8fafc;
+    }
+
+    .info-box h4{
+
+      color:#0f766e;
+      margin-bottom:10px;
+    }
+
+    .invoice-table{
+
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .invoice-table th{
+
+      background:#0f766e;
+      color:white;
+      padding:14px;
+    }
+
+    .invoice-table td{
+
+      padding:12px;
+      border:1px solid #d1d5db;
+    }
+
+    .invoice-table tfoot td{
+
+      background:#f0fdfa;
+      font-size:16px;
+    }
+
+    .invoice-sub-sections{
+
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      margin-bottom:22px;
+    }
+
+    .invoice-sub-section{
+
+      border:1px solid #94a3b8;
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      page-break-inside:avoid;
+    }
+
+    .invoice-sub-section-title{
+
+      margin:0;
+      padding:12px 16px;
+      background:linear-gradient(
+      135deg,
+      #ccfbf1,
+      #f0fdfa
+      );
+
+      color:#0f766e;
+      font-size:16px;
+      font-weight:700;
+      border-bottom:1px solid #cbd5e1;
+    }
+
+    .invoice-sub-section .invoice-table{
+
+      margin:0;
+    }
+
+    .invoice-main-total-wrap{
+
+      border:2px solid #0f766e;
+      border-radius:14px;
+      overflow:hidden;
+      margin-bottom:8px;
+    }
+
+    .invoice-main-total-wrap .invoice-table td{
+
+      background:#ccfbf1;
+      font-weight:700;
+      font-size:16px;
+    }
+
+    .invoice-footer{
+
+      margin-top:30px;
+
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+    }
+
+    .invoice-footer p{
+
+      color:#64748b;
+      font-size:13px;
+      margin-bottom:5px;
+    }
+
+    .signature-box{
+
+      text-align:center;
+    }
+
+    .signature-line{
+
+      width:180px;
+      border-top:2px solid #0f172a;
+
+      margin-bottom:8px;
+    }
+
+    @media(max-width:768px){
+
+      body{
+        padding:16px 12px;
+        padding-left:max(
+          12px,
+          env(safe-area-inset-left)
+        );
+        padding-right:max(
+          12px,
+          env(safe-area-inset-right)
+        );
+        padding-bottom:max(
+          16px,
+          env(safe-area-inset-bottom)
+        );
       }
 
-      .preview-item {
-        grid-template-columns: 1fr;
+      .container{
+        padding:0;
       }
 
-      .preview-item img {
-        width: 100%;
-        height: 180px;
+      header{
+        margin-bottom:18px;
+      }
+
+      header h1{
+        font-size:26px;
+        line-height:1.2;
+      }
+
+      header p{
+        font-size:14px;
+      }
+
+      .card{
+        padding:16px 14px;
+        border-radius:18px;
+        margin-bottom:16px;
+      }
+
+      .card h2{
+        font-size:22px;
+        margin-bottom:14px;
+      }
+
+      .meter-box{
+        padding:16px 12px;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .sub-meters-wrap{
+        grid-template-columns:1fr;
+      }
+
+      input,
+      select,
+      textarea{
+        padding:12px 14px;
+        font-size:16px;
+      }
+
+      button{
+        width:100%;
+        touch-action:manipulation;
+      }
+
+      .meter-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .remove-btn{
+        width:100%;
+      }
+
+      .add-sub-btn{
+        max-width:none;
+      }
+
+      .invoice-header{
+        flex-direction:column;
+        gap:15px;
+      }
+
+      .invoice-meta{
+        text-align:left;
+      }
+
+      .invoice-info{
+        grid-template-columns:1fr;
+      }
+
+      .invoice-footer{
+        flex-direction:column;
+        gap:20px;
+        align-items:flex-start;
+      }
+
+      .table-wrapper{
+        margin:0 -2px;
+        border-radius:12px;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      #resultBox .table-wrapper table{
+
+        min-width:580px;
+        font-size:12.5px;
+      }
+
+      #resultBox th,
+      #resultBox td{
+
+        padding:9px 7px;
+      }
+
+      .summary-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+
+      .summary-box{
+        padding:16px;
       }
     }
+
+    @media print{
+
+      @page{
+        size:A4 portrait;
+        margin:4mm 5mm;
+      }
+
+      html{
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+
+      body{
+        background:white;
+        padding:0;
+        margin:0;
+        font-size:10.5px;
+        line-height:1.25;
+      }
+
+      .container{
+        max-width:none;
+        margin:0;
+        padding:0;
+      }
+
+      header,
+      .card:not(.result-card),
+      footer,
+      .btn-area,
+      .warning,
+      #resultBox{
+        display:none !important;
+      }
+
+      .result-card{
+        background:white;
+        box-shadow:none;
+        border:none;
+        padding:0;
+        margin:0;
+      }
+
+      .result-card > h2{
+        display:none !important;
+      }
+
+      #printGroupedResult{
+        display:block !important;
+        width:100%;
+      }
+
+      .invoice-wrapper{
+
+        padding:6px 8px;
+        margin:0 0 5px;
+        border-radius:6px;
+        border-width:1px;
+        page-break-inside:auto;
+        break-inside:auto;
+      }
+
+      .invoice-wrapper:last-child{
+        margin-bottom:0;
+      }
+
+      .invoice-header{
+
+        padding-bottom:6px;
+        margin-bottom:6px;
+        border-bottom-width:1px;
+        gap:8px;
+      }
+
+      .invoice-header h1{
+        font-size:16px;
+        margin-bottom:2px;
+      }
+
+      .invoice-header p{
+        font-size:9px;
+      }
+
+      .invoice-meta{
+        font-size:9px;
+        line-height:1.35;
+      }
+
+      .invoice-info{
+
+        gap:6px;
+        margin-bottom:6px;
+      }
+
+      .info-box{
+
+        padding:6px 8px;
+        border-radius:6px;
+      }
+
+      .info-box h4{
+        font-size:10px;
+        margin-bottom:4px;
+      }
+
+      .info-box p{
+        font-size:9px;
+        margin:1px 0;
+      }
+
+      .invoice-sub-sections{
+
+        flex-direction:row;
+        flex-wrap:wrap;
+        align-items:stretch;
+        gap:6px;
+        margin-bottom:6px;
+      }
+
+      .invoice-sub-section{
+
+        flex:1 1 calc(50% - 4px);
+        max-width:100%;
+        min-width:130px;
+        border-radius:6px;
+        page-break-inside:avoid;
+        break-inside:avoid;
+      }
+
+      .invoice-sub-section-title{
+
+        padding:4px 6px;
+        font-size:10px;
+      }
+
+      .invoice-table th,
+      .invoice-table td{
+
+        padding:3px 5px !important;
+        font-size:9px;
+      }
+
+      .invoice-table th{
+        background:#0f766e !important;
+        color:white !important;
+      }
+
+      .invoice-table tfoot td{
+        background:#ccfbf1 !important;
+        font-size:9px !important;
+      }
+
+      .invoice-main-total-wrap{
+
+        margin-bottom:4px;
+        border-radius:6px;
+        border-width:1px;
+      }
+
+      .invoice-main-total-wrap .invoice-table td{
+
+        background:#ccfbf1 !important;
+        font-weight:700;
+        font-size:10px !important;
+        padding:4px 5px !important;
+      }
+
+      .invoice-footer{
+
+        margin-top:6px;
+        gap:6px;
+        align-items:flex-end;
+      }
+
+      .invoice-footer p{
+        font-size:8px;
+        margin-bottom:1px;
+        line-height:1.2;
+      }
+
+      .signature-line{
+
+        width:100px;
+        margin-bottom:2px;
+      }
+
+      .signature-box p{
+        font-size:8px;
+      }
+    }
+
   </style>
 </head>
+
 <body>
+
   <div class="container">
-    <h1>Image to PDF / PDF to Word</h1>
-    <p class="sub">
-      Upload images to create compressed PDFs, or upload a PDF to extract text into Word.
-    </p>
 
-    <div class="grid">
-      <div class="card">
-        <h2>Images → PDF</h2>
-        <p class="help">
-          Supports 1, 2, or 4 images per page, compression, and Black & White mode.
-        </p>
+    <header>
 
-        <div class="field">
-          <label for="imageInput">Select images</label>
-          <input id="imageInput" type="file" accept="image/*" multiple />
-        </div>
+      <h1>
+        ⚡ ডিজিটাল সাব-মিটার বিলিং সিস্টেম
+      </h1>
 
-        <div class="row-3">
-          <div class="field">
-            <label for="pageFormat">Page size</label>
-            <select id="pageFormat">
-              <option value="a4">A4</option>
-              <option value="letter">Letter</option>
-            </select>
-          </div>
+      <p>
+        Developed by Ashikur Rahman 
+      </p>
 
-          <div class="field">
-            <label for="pageOrientation">Orientation</label>
-            <select id="pageOrientation">
-              <option value="portrait">Portrait</option>
-              <option value="landscape">Landscape</option>
-            </select>
-          </div>
+    </header>
 
-          <div class="field">
-            <label for="pageMargin">Margin</label>
-            <input id="pageMargin" type="number" min="0" max="40" value="10" />
-          </div>
-        </div>
+    <section class="card">
 
-        <div class="row-3">
-          <div class="field">
-            <label for="imagesPerPage">Images per page</label>
-            <select id="imagesPerPage">
-              <option value="1">1 image per page</option>
-              <option value="2">2 images per page</option>
-              <option value="4">4 images per page</option>
-            </select>
-          </div>
+      <h2>
+        মেইন মিটারসমূহ
+      </h2>
 
-          <div class="field">
-            <label for="cellGap">Gap between images</label>
-            <input id="cellGap" type="number" min="0" max="20" value="6" />
-          </div>
+      <div id="metersContainer"></div>
 
-          <div class="field">
-            <label for="jpegQuality">Image quality</label>
-            <select id="jpegQuality">
-              <option value="0.92">High</option>
-              <option value="0.8" selected>Medium</option>
-              <option value="0.65">Low</option>
-            </select>
-          </div>
-        </div>
+      <div class="btn-area">
 
-        <div class="row-3">
-          <div class="field">
-            <label for="maxImageSize">Max image size</label>
-            <select id="maxImageSize">
-              <option value="2560">2560 px</option>
-              <option value="1920" selected>1920 px</option>
-              <option value="1600">1600 px</option>
-              <option value="1280">1280 px</option>
-            </select>
-          </div>
+        <button
+          class="add-btn"
+          onclick="addMainMeter()"
+        >
+          + মেইন মিটার যোগ করুন
+        </button>
 
-          <div class="field">
-            <label for="colorMode">Color mode</label>
-            <select id="colorMode">
-              <option value="color">Color</option>
-              <option value="grayscale">Black & White</option>
-            </select>
-          </div>
+        <button
+          class="calculate-btn"
+          onclick="calculateBill()"
+        >
+          বিল হিসাব করুন
+        </button>
 
-          <div class="field">
-            <label for="pdfFileName">PDF file name</label>
-            <input id="pdfFileName" type="text" value="images-to-pdf" />
-          </div>
-        </div>
+        <button
+          class="reset-btn"
+          onclick="resetForm()"
+        >
+          রিসেট
+        </button>
 
-        <div class="buttons">
-          <button class="primary" id="createPdfBtn" type="button">Create PDF</button>
-          <button class="secondary" id="clearImagesBtn" type="button">Clear Images</button>
-        </div>
-
-        <div id="imageStatus" class="status"></div>
-        <div id="imagePreview" class="preview-list"></div>
       </div>
 
-      <div class="card">
-        <h2>PDF → Word</h2>
-        <p class="help">
-          Best for text-based PDFs. Scanned PDFs need OCR.
-        </p>
+      <div id="warning" class="warning"></div>
 
-        <div class="field">
-          <label for="pdfInput">Select PDF</label>
-          <input id="pdfInput" type="file" accept=".pdf,application/pdf" />
+    </section>
+
+    <section class="card result-card">
+
+      <h2>
+        ফলাফল
+      </h2>
+
+      <div id="resultBox">
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>সাব-মিটার</th>
+
+                <th>রুম নম্বর</th>
+
+                <th>মেইন</th>
+
+                <th>মিটার নম্বর</th>
+
+                <th class="right">
+                  আসল ইউনিট
+                </th>
+
+                <th class="right">
+                  Adjust ইউনিট
+                </th>
+
+                <th class="right">
+                  Final ইউনিট
+                </th>
+
+                <th class="right">
+                  টাকা
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="resultRows"></tbody>
+
+            <tfoot id="resultTotals"></tfoot>
+
+          </table>
+
         </div>
 
-        <div class="row">
-          <div class="field">
-            <label for="wordFileName">Output file name</label>
-            <input id="wordFileName" type="text" value="converted-document" />
+        <div class="summary-grid">
+
+          <div class="summary-box">
+
+            <h4>
+              মোট ইউনিট
+            </h4>
+
+            <h3 id="grandUnits">
+              0
+            </h3>
+
           </div>
 
-          <div class="field">
-            <label for="keepPageBreaks">Keep page breaks</label>
-            <select id="keepPageBreaks">
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+          <div class="summary-box">
+
+            <h4>
+              মোট টাকা
+            </h4>
+
+            <h3 id="grandAmount">
+              ৳ 0
+            </h3>
+
           </div>
+
         </div>
 
-        <div class="buttons">
-          <button class="primary" id="createWordBtn" type="button">Create Word File</button>
-          <button class="secondary" id="clearPdfBtn" type="button">Clear PDF</button>
-        </div>
-
-        <div id="pdfStatus" class="status"></div>
-        <div id="pdfMeta" class="meta-box">No PDF selected yet.</div>
       </div>
-    </div>
 
-    <p class="note">
-      Black & White mode converts photos to grayscale before creating the PDF.
-    </p>
+      <div id="printGroupedResult"></div>
+
+      <div class="btn-area">
+
+        <button
+          class="calculate-btn"
+          onclick="printA4DigitalBill()"
+        >
+          🖨️ Invoice Print
+        </button>
+
+      </div>
+
+    </section>
+
+    <footer>
+
+      <p>
+        Developed by Ashikur Rahman (GitHub: <a href="https://github.com/ashikurrahman1223" target="_blank">https://github.com/ashikurrahman1223</a>
+      </p>
+
+    </footer>
+
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-
   <script>
-    (() => {
-      "use strict";
 
-      const $ = (id) => document.getElementById(id);
+    let meterCount = 0;
 
-      const imageInput = $("imageInput");
-      const createPdfBtn = $("createPdfBtn");
-      const clearImagesBtn = $("clearImagesBtn");
-      const imageStatus = $("imageStatus");
-      const imagePreview = $("imagePreview");
-      const pageFormat = $("pageFormat");
-      const pageOrientation = $("pageOrientation");
-      const pageMargin = $("pageMargin");
-      const imagesPerPage = $("imagesPerPage");
-      const cellGap = $("cellGap");
-      const jpegQuality = $("jpegQuality");
-      const maxImageSize = $("maxImageSize");
-      const colorMode = $("colorMode");
-      const pdfFileName = $("pdfFileName");
+    let activeMeters = [];
 
-      const pdfInput = $("pdfInput");
-      const createWordBtn = $("createWordBtn");
-      const clearPdfBtn = $("clearPdfBtn");
-      const pdfStatus = $("pdfStatus");
-      const pdfMeta = $("pdfMeta");
-      const wordFileName = $("wordFileName");
-      const keepPageBreaks = $("keepPageBreaks");
+    let lastCalculatedData = null;
 
-      const state = {
-        images: [],
-        pdfFile: null
-      };
+    let mainMeterSubs = {};
 
-      function setStatus(el, message, type = "") {
-        el.textContent = message;
-        el.className = "status" + (type ? " " + type : "");
-      }
+    function displaySuffix(suf){
 
-      function bytesToSize(bytes) {
-        if (!bytes) return "0 B";
-        const units = ["B", "KB", "MB", "GB"];
-        let size = bytes;
-        let unit = 0;
+      return suf.split("").map(function(ch){
 
-        while (size >= 1024 && unit < units.length - 1) {
-          size /= 1024;
-          unit++;
-        }
+        return ch.toUpperCase();
+      }).join("");
+    }
 
-        return size.toFixed(size >= 10 || unit === 0 ? 0 : 1) + " " + units[unit];
-      }
+    function subMeterTitle(mainNo, suffix){
 
-      function safeFileName(name, fallback) {
-        const cleaned = String(name || fallback || "output")
-          .trim()
-          .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
-          .replace(/\.+$/, "");
-        return cleaned || fallback || "output";
-      }
+      return (
+        "সাব " +
+        mainNo +
+        displaySuffix(suffix)
+      );
+    }
 
-      function removeExt(name) {
-        return String(name).replace(/\.[^.]+$/, "");
-      }
+    function nextSubSuffix(existing){
 
-      function uid() {
-        return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
-      }
+      const alpha =
+      "abcdefghijklmnopqrstuvwxyz";
 
-      function downloadBlob(blob, filename) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
+      const lower =
+      existing.map(function(s){
 
-      function readAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("Could not read file."));
-          reader.readAsDataURL(file);
-        });
-      }
+        return String(s).toLowerCase();
+      });
 
-      function readAsArrayBuffer(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("Could not read file."));
-          reader.readAsArrayBuffer(file);
-        });
-      }
+      for(let i=0;i<alpha.length;i++){
 
-      function loadImage(src) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error("Image failed to load."));
-          img.src = src;
-        });
-      }
+        if(lower.indexOf(alpha[i]) === -1){
 
-      function ensureLibrariesForPdf() {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-          throw new Error("jsPDF library failed to load.");
+          return alpha[i];
         }
       }
 
-      function ensureLibrariesForWord() {
-        if (!window.pdfjsLib) throw new Error("PDF.js library failed to load.");
-        if (!window.docx) throw new Error("docx library failed to load.");
-      }
+      return "z" + (existing.length + 1);
+    }
 
-      function escapeHtml(text) {
-        return String(text).replace(/[&<>"']/g, (m) => ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          "\"": "&quot;",
-          "'": "&#039;"
-        }[m]));
-      }
+    function renderSubMeterSectionHTML(
+      mainNo,
+      suffix
+    ){
 
-      function renderImages() {
-        if (!state.images.length) {
-          imagePreview.innerHTML = "";
-          return;
-        }
+      const shellId =
+      "subMeterSection" +
+      mainNo +
+      "_" +
+      suffix;
 
-        imagePreview.innerHTML = state.images.map((item, index) => `
-          <div class="preview-item">
-            <img src="${item.url}" alt="preview" />
-            <div>
-              <div><strong>${index + 1}. ${escapeHtml(item.file.name)}</strong></div>
-              <div style="color:#94a3b8;margin-top:6px;">${bytesToSize(item.file.size)}</div>
-            </div>
-            <div class="small-actions">
-              <button class="secondary" data-action="up" data-id="${item.id}" ${index === 0 ? "disabled" : ""}>Up</button>
-              <button class="secondary" data-action="down" data-id="${item.id}" ${index === state.images.length - 1 ? "disabled" : ""}>Down</button>
-              <button class="danger" data-action="remove" data-id="${item.id}">Remove</button>
-            </div>
+      const title =
+      subMeterTitle(mainNo, suffix);
+
+      return `
+
+        <div
+          class="sub-meter-section"
+          id="${shellId}"
+          data-sub-suffix="${suffix}"
+        >
+
+          <div class="sub-meter-section-head">
+
+            <h4>
+              ${title}
+            </h4>
+
+            <button
+              type="button"
+              class="remove-sub-btn"
+              onclick="removeSubMeter(${mainNo}, '${suffix}')"
+            >
+              মুছুন
+            </button>
+
           </div>
-        `).join("");
+
+          <div class="sub-meter-inner">
+
+            <div class="form-group">
+
+              <label>
+                রুম নম্বর
+              </label>
+
+              <input
+                type="text"
+                id="subRoom${mainNo}${suffix}"
+                placeholder="যেমন: ১০১"
+              />
+
+            </div>
+
+            <div class="form-group">
+
+              <label>
+                আগের রিডিং
+              </label>
+
+              <input
+                type="number"
+                id="subPrev${mainNo}${suffix}"
+              />
+
+            </div>
+
+            <div class="form-group">
+
+              <label>
+                বর্তমান রিডিং
+              </label>
+
+              <input
+                type="number"
+                id="subCurrent${mainNo}${suffix}"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+    }
+
+    function refreshSubRemoveButtons(mainNo){
+
+      const wrap =
+      getInput("subMetersWrap" + mainNo);
+
+      if(!wrap){
+        return;
       }
 
-      imageInput.addEventListener("change", () => {
-        const files = Array.from(imageInput.files || []).filter((file) =>
-          file.type.startsWith("image/")
+      const list =
+      mainMeterSubs[mainNo] || [];
+
+      const showRemove =
+      list.length > 1;
+
+      const buttons =
+      wrap.querySelectorAll(".remove-sub-btn");
+
+      for(let b=0;b<buttons.length;b++){
+
+        buttons[b].style.display =
+        showRemove
+        ? "inline-block"
+        : "none";
+      }
+    }
+
+    function addSubMeter(mainNo){
+
+      const list =
+      mainMeterSubs[mainNo];
+
+      if(!list){
+        return;
+      }
+
+      const suf =
+      nextSubSuffix(list);
+
+      list.push(suf);
+
+      const wrap =
+      getInput("subMetersWrap" + mainNo);
+
+      wrap.insertAdjacentHTML(
+        "beforeend",
+        renderSubMeterSectionHTML(mainNo, suf)
+      );
+
+      refreshSubRemoveButtons(mainNo);
+      clearResult();
+      clearWarning();
+    }
+
+    function removeSubMeter(mainNo, suffix){
+
+      const list =
+      mainMeterSubs[mainNo];
+
+      if(!list || list.length <= 1){
+
+        showWarning(
+          "কমপক্ষে ১টি সাব মিটার থাকতে হবে।"
         );
 
-        if (!files.length) {
-          setStatus(imageStatus, "No valid image files selected.", "error");
+        return;
+      }
+
+      const idx =
+      list.indexOf(suffix);
+
+      if(idx === -1){
+        return;
+      }
+
+      list.splice(idx, 1);
+
+      const shell =
+      getInput(
+        "subMeterSection" +
+        mainNo +
+        "_" +
+        suffix
+      );
+
+      if(shell){
+        shell.remove();
+      }
+
+      refreshSubRemoveButtons(mainNo);
+      clearResult();
+      clearWarning();
+    }
+
+    function getInput(id){
+      return document.getElementById(id);
+    }
+
+    function getValue(id){
+
+      const input = getInput(id);
+
+      if(!input) return null;
+
+      if(input.value === "") return null;
+
+      return Number(input.value);
+    }
+
+    function getTextValue(id){
+
+      const input = getInput(id);
+
+      if(!input) return "";
+
+      return input.value.trim();
+    }
+
+    function showWarning(message){
+
+      const warning =
+      getInput("warning");
+
+      warning.innerText = message;
+
+      warning.style.display = "block";
+
+      getInput("resultBox").style.display = "none";
+    }
+
+    function clearWarning(){
+
+      getInput("warning").style.display =
+      "none";
+    }
+
+    function addMainMeter(){
+
+      meterCount++;
+
+      activeMeters.push(meterCount);
+
+      const container =
+      getInput("metersContainer");
+
+      mainMeterSubs[meterCount] = [
+        "a",
+        "b"
+      ];
+
+      const subBlocksHtml =
+      renderSubMeterSectionHTML(
+        meterCount,
+        "a"
+      ) +
+      renderSubMeterSectionHTML(
+        meterCount,
+        "b"
+      );
+
+      const html = `
+
+      <div
+        class="meter-box"
+        id="meterBox${meterCount}"
+      >
+
+        <div class="meter-header">
+
+          <h3>
+            ⚡ মেইন মিটার ${meterCount}
+          </h3>
+
+          <button
+            class="remove-btn"
+            onclick="removeMainMeter(${meterCount})"
+          >
+            মুছে ফেলুন
+          </button>
+
+        </div>
+
+        <div class="grid">
+
+          <div class="form-group">
+
+            <label>
+              মিটার নম্বর
+            </label>
+
+            <input
+              type="text"
+              id="meterNumber${meterCount}"
+              placeholder="যেমন: A-101"
+            />
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              মোট বিল (৳)
+            </label>
+
+            <input
+              type="number"
+              id="mainBill${meterCount}"
+              placeholder="যেমন: 3000"
+            />
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              মেইন ইউনিট
+            </label>
+
+            <input
+              type="number"
+              id="mainUnits${meterCount}"
+              placeholder="যেমন: 300"
+            />
+
+          </div>
+
+        </div>
+
+        <div class="sub-title">
+
+          সাব-মিটারসমূহ
+
+        </div>
+
+        <div
+          class="sub-meters-wrap"
+          id="subMetersWrap${meterCount}"
+        >
+
+          ${subBlocksHtml}
+
+        </div>
+
+        <button
+          type="button"
+          class="add-sub-btn"
+          onclick="addSubMeter(${meterCount})"
+        >
+          + সাব মিটার যোগ করুন
+        </button>
+
+      </div>
+
+      `;
+
+      container.insertAdjacentHTML(
+        "beforeend",
+        html
+      );
+
+      refreshSubRemoveButtons(meterCount);
+
+      clearResult();
+      clearWarning();
+    }
+
+    function removeMainMeter(mainNo){
+
+      if(activeMeters.length === 1){
+
+        showWarning(
+          "কমপক্ষে ১টি মেইন মিটার থাকতে হবে।"
+        );
+
+        return;
+      }
+
+      const box =
+      getInput("meterBox" + mainNo);
+
+      if(box){
+        box.remove();
+      }
+
+      activeMeters =
+      activeMeters.filter(function(num){
+
+        return num !== mainNo;
+      });
+
+      delete mainMeterSubs[mainNo];
+
+      clearResult();
+    }
+
+    function calculateBill(){
+
+      clearWarning();
+
+      const rows = [];
+
+      const mainTotals = [];
+
+      for(let i=0;i<activeMeters.length;i++){
+
+        const mainNo =
+        activeMeters[i];
+
+        const meterNumber =
+        getTextValue(
+          "meterNumber" + mainNo
+        ) || "N/A";
+
+        const bill =
+        getValue(
+          "mainBill" + mainNo
+        );
+
+        const mainUnits =
+        getValue(
+          "mainUnits" + mainNo
+        );
+
+        if(
+          bill === null ||
+          mainUnits === null ||
+          bill <= 0 ||
+          mainUnits <= 0
+        ){
+
+          showWarning(
+            "মেইন " +
+            mainNo +
+            " এর সঠিক তথ্য দিন।"
+          );
+
           return;
         }
 
-        const items = files.map((file) => ({
-          id: uid(),
-          file,
-          url: URL.createObjectURL(file)
-        }));
+        const rate =
+        bill / mainUnits;
 
-        state.images.push(...items);
-        renderImages();
-        setStatus(imageStatus, files.length + " image(s) added.", "success");
-        imageInput.value = "";
-      });
+        const suffixes =
+        mainMeterSubs[mainNo] || [];
 
-      imagePreview.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-action][data-id]");
-        if (!btn) return;
+        if(!suffixes.length){
 
-        const action = btn.dataset.action;
-        const id = btn.dataset.id;
-        const index = state.images.findIndex((item) => item.id === id);
-        if (index === -1) return;
-
-        if (action === "remove") {
-          URL.revokeObjectURL(state.images[index].url);
-          state.images.splice(index, 1);
-        }
-
-        if (action === "up" && index > 0) {
-          [state.images[index - 1], state.images[index]] =
-            [state.images[index], state.images[index - 1]];
-        }
-
-        if (action === "down" && index < state.images.length - 1) {
-          [state.images[index], state.images[index + 1]] =
-            [state.images[index + 1], state.images[index]];
-        }
-
-        renderImages();
-      });
-
-      clearImagesBtn.addEventListener("click", () => {
-        for (const item of state.images) {
-          URL.revokeObjectURL(item.url);
-        }
-        state.images = [];
-        renderImages();
-        setStatus(imageStatus, "Images cleared.");
-      });
-
-      function getPageSizeMm(format, orientation) {
-        const sizes = {
-          a4: {
-            portrait: [210, 297],
-            landscape: [297, 210]
-          },
-          letter: {
-            portrait: [215.9, 279.4],
-            landscape: [279.4, 215.9]
-          }
-        };
-
-        return sizes[format][orientation];
-      }
-
-      function getLayoutBoxes(pageW, pageH, margin, gap, perPage, orientation) {
-        const innerW = pageW - margin * 2;
-        const innerH = pageH - margin * 2;
-
-        if (perPage === 1) {
-          return [{ x: margin, y: margin, w: innerW, h: innerH }];
-        }
-
-        if (perPage === 2) {
-          if (orientation === "landscape") {
-            const boxW = (innerW - gap) / 2;
-            return [
-              { x: margin, y: margin, w: boxW, h: innerH },
-              { x: margin + boxW + gap, y: margin, w: boxW, h: innerH }
-            ];
-          }
-
-          const boxH = (innerH - gap) / 2;
-          return [
-            { x: margin, y: margin, w: innerW, h: boxH },
-            { x: margin, y: margin + boxH + gap, w: innerW, h: boxH }
-          ];
-        }
-
-        if (perPage === 4) {
-          const boxW = (innerW - gap) / 2;
-          const boxH = (innerH - gap) / 2;
-
-          return [
-            { x: margin, y: margin, w: boxW, h: boxH },
-            { x: margin + boxW + gap, y: margin, w: boxW, h: boxH },
-            { x: margin, y: margin + boxH + gap, w: boxW, h: boxH },
-            { x: margin + boxW + gap, y: margin + boxH + gap, w: boxW, h: boxH }
-          ];
-        }
-
-        return [{ x: margin, y: margin, w: innerW, h: innerH }];
-      }
-
-      function fitImageIntoBox(imgWidth, imgHeight, box) {
-        const imgRatio = imgWidth / imgHeight;
-        const boxRatio = box.w / box.h;
-
-        let w;
-        let h;
-
-        if (imgRatio > boxRatio) {
-          w = box.w;
-          h = w / imgRatio;
-        } else {
-          h = box.h;
-          w = h * imgRatio;
-        }
-
-        return {
-          x: box.x + (box.w - w) / 2,
-          y: box.y + (box.h - h) / 2,
-          w,
-          h
-        };
-      }
-
-      async function compressImageFile(file, quality, maxDimension, mode) {
-        const sourceDataUrl = await readAsDataURL(file);
-        const img = await loadImage(sourceDataUrl);
-
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
-
-        const biggestSide = Math.max(width, height);
-        if (biggestSide > maxDimension) {
-          const scale = maxDimension / biggestSide;
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        if (mode === "grayscale") {
-          const imageData = ctx.getImageData(0, 0, width, height);
-          const data = imageData.data;
-
-          for (let i = 0; i < data.length; i += 4) {
-            const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-            data[i] = gray;
-            data[i + 1] = gray;
-            data[i + 2] = gray;
-          }
-
-          ctx.putImageData(imageData, 0, 0);
-        }
-
-        return {
-          dataUrl: canvas.toDataURL("image/jpeg", quality),
-          width,
-          height,
-          file
-        };
-      }
-
-      async function prepareCompressedImages(items, quality, maxDimension, mode) {
-        const prepared = [];
-
-        for (const item of items) {
-          prepared.push(
-            await compressImageFile(item.file, quality, maxDimension, mode)
-          );
-        }
-
-        return prepared;
-      }
-
-      createPdfBtn.addEventListener("click", async () => {
-        try {
-          ensureLibrariesForPdf();
-
-          if (!state.images.length) {
-            setStatus(imageStatus, "Please upload at least one image.", "error");
-            return;
-          }
-
-          createPdfBtn.disabled = true;
-          setStatus(imageStatus, "Compressing images and creating PDF...", "warn");
-
-          const { jsPDF } = window.jspdf;
-
-          const margin = Math.max(0, Math.min(40, Number(pageMargin.value) || 0));
-          const gap = Math.max(0, Math.min(20, Number(cellGap.value) || 0));
-          const format = pageFormat.value;
-          const orientation = pageOrientation.value;
-          const perPage = Number(imagesPerPage.value) || 1;
-          const quality = Math.max(0.3, Math.min(0.98, Number(jpegQuality.value) || 0.8));
-          const maxDimension = Math.max(800, Math.min(4000, Number(maxImageSize.value) || 1920));
-          const mode = colorMode.value;
-
-          const [pageW, pageH] = getPageSizeMm(format, orientation);
-          const layoutBoxes = getLayoutBoxes(pageW, pageH, margin, gap, perPage, orientation);
-
-          const preparedImages = await prepareCompressedImages(
-            state.images,
-            quality,
-            maxDimension,
-            mode
+          showWarning(
+            "মেইন " +
+            mainNo +
+            " এ কোনো সাব মিটার নেই।"
           );
 
-          const doc = new jsPDF({
-            orientation: orientation === "portrait" ? "p" : "l",
-            unit: "mm",
-            format,
-            compress: true
-          });
-
-          for (let i = 0; i < preparedImages.length; i += perPage) {
-            const pageImages = preparedImages.slice(i, i + perPage);
-
-            if (i > 0) {
-              doc.addPage(format, orientation === "portrait" ? "p" : "l");
-            }
-
-            for (let j = 0; j < pageImages.length; j++) {
-              const item = pageImages[j];
-              const box = layoutBoxes[j];
-              const fitted = fitImageIntoBox(item.width, item.height, box);
-
-              doc.addImage(
-                item.dataUrl,
-                "JPEG",
-                fitted.x,
-                fitted.y,
-                fitted.w,
-                fitted.h,
-                undefined,
-                "FAST"
-              );
-            }
-          }
-
-          const outputName = safeFileName(pdfFileName.value, "images-to-pdf") + ".pdf";
-          doc.save(outputName);
-
-          setStatus(
-            imageStatus,
-            `PDF downloaded successfully. Mode: ${mode === "grayscale" ? "Black & White" : "Color"}.`,
-            "success"
-          );
-        } catch (err) {
-          console.error(err);
-          setStatus(imageStatus, err.message || "Failed to create PDF.", "error");
-        } finally {
-          createPdfBtn.disabled = false;
-        }
-      });
-
-      pdfInput.addEventListener("change", () => {
-        const file = (pdfInput.files || [])[0];
-
-        if (!file) {
-          setStatus(pdfStatus, "No PDF selected.", "error");
           return;
         }
 
-        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-        if (!isPdf) {
-          setStatus(pdfStatus, "Please select a valid PDF file.", "error");
-          return;
-        }
+        let subMeters = [];
 
-        state.pdfFile = file;
-        wordFileName.value = safeFileName(removeExt(file.name), "converted-document");
-        pdfMeta.innerHTML = `
-          <strong>${escapeHtml(file.name)}</strong><br>
-          Size: ${bytesToSize(file.size)}
-        `;
-        setStatus(pdfStatus, "PDF selected successfully.", "success");
-      });
+        let totalSubUnits = 0;
 
-      clearPdfBtn.addEventListener("click", () => {
-        state.pdfFile = null;
-        pdfInput.value = "";
-        pdfMeta.textContent = "No PDF selected yet.";
-        setStatus(pdfStatus, "PDF cleared.");
-      });
+        for(let j=0;j<suffixes.length;j++){
 
-      function groupLines(items) {
-        const sorted = [...items].sort((a, b) => {
-          const ay = a.transform[5];
-          const by = b.transform[5];
-          const ax = a.transform[4];
-          const bx = b.transform[4];
+          const suffix =
+          suffixes[j];
 
-          if (Math.abs(ay - by) > 2) return by - ay;
-          return ax - bx;
-        });
+          const prev =
+          getValue(
+            "subPrev" +
+            mainNo +
+            suffix
+          );
 
-        const lines = [];
-        let current = [];
-        let currentY = null;
+          const current =
+          getValue(
+            "subCurrent" +
+            mainNo +
+            suffix
+          );
 
-        for (const item of sorted) {
-          const y = item.transform[5];
+          const label =
+          subMeterTitle(mainNo, suffix);
 
-          if (currentY === null || Math.abs(currentY - y) <= 2) {
-            current.push(item);
-            currentY = currentY === null ? y : (currentY + y) / 2;
-          } else {
-            lines.push(current);
-            current = [item];
-            currentY = y;
-          }
-        }
+          const roomNumber =
+          getTextValue(
+            "subRoom" +
+            mainNo +
+            suffix
+          );
 
-        if (current.length) lines.push(current);
+          if(
+            prev === null ||
+            current === null
+          ){
 
-        return lines.map((line) =>
-          line
-            .sort((a, b) => a.transform[4] - b.transform[4])
-            .map((x) => x.str || "")
-            .join(" ")
-            .replace(/\s+/g, " ")
-            .replace(/\s([,.;:!?])/g, "$1")
-            .trim()
-        ).filter(Boolean);
-      }
-
-      createWordBtn.addEventListener("click", async () => {
-        try {
-          ensureLibrariesForWord();
-
-          if (!state.pdfFile) {
-            setStatus(pdfStatus, "Please upload a PDF first.", "error");
-            return;
-          }
-
-          createWordBtn.disabled = true;
-          setStatus(pdfStatus, "Reading PDF and creating Word file...", "warn");
-
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-          const buffer = await readAsArrayBuffer(state.pdfFile);
-          const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
-
-          const {
-            Document,
-            Packer,
-            Paragraph,
-            TextRun,
-            HeadingLevel,
-            PageBreak,
-            AlignmentType
-          } = window.docx;
-
-          const children = [];
-          let emptyPages = 0;
-
-          const DEFAULT_FONT = "Arial";
-          const DEFAULT_SIZE = 22;
-
-          for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
-            const page = await pdf.getPage(pageNo);
-            const textContent = await page.getTextContent();
-            const lines = groupLines(textContent.items || []);
-
-            children.push(
-              new Paragraph({
-                heading: HeadingLevel.HEADING_2,
-                children: [
-                  new TextRun({
-                    text: "Page " + pageNo,
-                    font: DEFAULT_FONT,
-                    size: 28,
-                    bold: true
-                  })
-                ]
-              })
+            showWarning(
+              label +
+              " এর রিডিং দিন।"
             );
 
-            if (!lines.length) {
-              emptyPages++;
-              children.push(
-                new Paragraph({
-                  alignment: AlignmentType.LEFT,
-                  children: [
-                    new TextRun({
-                      text: "[No extractable text found on this page]",
-                      font: DEFAULT_FONT,
-                      size: DEFAULT_SIZE,
-                      italics: true
-                    })
-                  ]
-                })
-              );
-            } else {
-              for (const line of lines) {
-                children.push(
-                  new Paragraph({
-                    alignment: AlignmentType.LEFT,
-                    children: [
-                      new TextRun({
-                        text: line,
-                        font: DEFAULT_FONT,
-                        size: DEFAULT_SIZE
-                      })
-                    ]
-                  })
-                );
-              }
-            }
-
-            if (keepPageBreaks.value === "yes" && pageNo < pdf.numPages) {
-              children.push(new Paragraph({ children: [new PageBreak()] }));
-            }
+            return;
           }
 
-          const doc = new Document({
-            styles: {
-              default: {
-                document: {
-                  run: {
-                    font: DEFAULT_FONT,
-                    size: DEFAULT_SIZE
-                  }
-                }
-              }
-            },
-            sections: [
-              {
-                properties: {
-                  page: {
-                    margin: {
-                      top: 720,
-                      right: 720,
-                      bottom: 720,
-                      left: 720
-                    }
-                  }
-                },
-                children
-              }
-            ]
+          if(current < prev){
+
+            showWarning(
+              label +
+              " এর বর্তমান রিডিং কম হতে পারবে না।"
+            );
+
+            return;
+          }
+
+          const originalUnits =
+          current - prev;
+
+          totalSubUnits += originalUnits;
+
+          subMeters.push({
+
+            sub:label,
+
+            suffix:suffix,
+
+            main:mainNo,
+
+            meterNumber:meterNumber,
+
+            roomNumber:roomNumber || "—",
+
+            originalUnits:originalUnits
+
+          });
+        }
+
+        // ====================
+        // AUTO ADJUSTMENT
+        // (proportional split of meter difference so
+        // sum of final units = main units, and
+        // sum of amounts = main bill)
+        // ====================
+
+        const difference =
+        mainUnits - totalSubUnits;
+
+        const nSubs =
+        subMeters.length;
+
+        let k;
+
+        if(totalSubUnits <= 0){
+
+          const share =
+          mainUnits / nSubs;
+
+          for(k=0;k<nSubs;k++){
+
+            const item =
+            subMeters[k];
+
+            item.finalUnits =
+            share;
+
+            item.adjustment =
+            item.finalUnits -
+            item.originalUnits;
+          }
+        } else {
+
+          for(k=0;k<nSubs;k++){
+
+            const item =
+            subMeters[k];
+
+            const shareOfDiff =
+            difference *
+            (
+              item.originalUnits /
+              totalSubUnits
+            );
+
+            item.adjustment =
+            shareOfDiff;
+
+            item.finalUnits =
+            item.originalUnits +
+            shareOfDiff;
+          }
+        }
+
+        let sumFinalUnits = 0;
+
+        for(k=0;k<nSubs;k++){
+
+          sumFinalUnits +=
+          subMeters[k].finalUnits;
+        }
+
+        const unitsGap =
+        mainUnits - sumFinalUnits;
+
+        if(
+          nSubs > 0 &&
+          Math.abs(unitsGap) > 1e-9
+        ){
+
+          const last =
+          subMeters[nSubs - 1];
+
+          last.finalUnits +=
+          unitsGap;
+
+          last.adjustment =
+          last.finalUnits -
+          last.originalUnits;
+        }
+
+        let finalTotalUnits = 0;
+
+        for(k=0;k<nSubs;k++){
+
+          const item =
+          subMeters[k];
+
+          item.amount =
+          item.finalUnits * rate;
+
+          finalTotalUnits +=
+          item.finalUnits;
+        }
+
+        let sumAmount = 0;
+
+        for(k=0;k<nSubs;k++){
+
+          sumAmount +=
+          subMeters[k].amount;
+        }
+
+        const amountGap =
+        bill - sumAmount;
+
+        if(
+          nSubs > 0 &&
+          Math.abs(amountGap) > 0.0005
+        ){
+
+          subMeters[nSubs - 1].amount +=
+          amountGap;
+        }
+
+        let finalTotalAmount = 0;
+
+        for(k=0;k<nSubs;k++){
+
+          finalTotalAmount +=
+          subMeters[k].amount;
+
+          rows.push(subMeters[k]);
+        }
+
+        mainTotals.push({
+
+          main:mainNo,
+
+          meterNumber:meterNumber,
+
+          difference:difference,
+
+          subUnits:finalTotalUnits,
+
+          amount:finalTotalAmount
+
+        });
+      }
+
+      lastCalculatedData = {
+        rows,
+        mainTotals
+      };
+
+      displayResult(
+        rows,
+        mainTotals
+      );
+
+      buildPrintGroupedResult(
+        rows,
+        mainTotals
+      );
+
+      getInput("resultBox").style.display =
+      "block";
+    }
+
+    function displayResult(
+      rows,
+      mainTotals
+    ){
+
+      const tbody =
+      getInput("resultRows");
+
+      const tfoot =
+      getInput("resultTotals");
+
+      tbody.innerHTML =
+      rows.map(function(r){
+
+        const sign =
+        r.adjustment >= 0
+        ? "+"
+        : "";
+
+        const adjustmentClass =
+        r.adjustment >= 0
+        ? "positive"
+        : "negative";
+
+        return `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${r.sub}
+            </strong>
+          </td>
+
+          <td>
+            ${r.roomNumber}
+          </td>
+
+          <td>
+            মেইন ${r.main}
+          </td>
+
+          <td>
+            ${r.meterNumber}
+          </td>
+
+          <td class="right">
+            ${r.originalUnits.toFixed(2)}
+          </td>
+
+          <td class="
+            right
+            ${adjustmentClass}
+          ">
+            ${sign}
+            ${r.adjustment.toFixed(2)}
+          </td>
+
+          <td class="right">
+
+            <strong>
+              ${r.finalUnits.toFixed(2)}
+            </strong>
+
+          </td>
+
+          <td class="right">
+
+            <strong>
+              ৳ ${r.amount.toFixed(2)}
+            </strong>
+
+          </td>
+
+        </tr>
+
+        `;
+
+      }).join("");
+
+      const grand =
+      mainTotals.reduce(function(acc,t){
+
+        return {
+
+          units:
+          acc.units + t.subUnits,
+
+          amount:
+          acc.amount + t.amount
+
+        };
+
+      },{
+
+        units:0,
+        amount:0
+      });
+
+      tfoot.innerHTML =
+
+      mainTotals.map(function(t){
+
+        const sign =
+        t.difference >= 0
+        ? "+"
+        : "";
+
+        return `
+
+        <tr style="background:#f8fafc;">
+
+          <td colspan="4">
+
+            <strong>
+              মেইন ${t.main} মোট
+            </strong>
+
+            <br>
+
+            <small>
+              Difference Adjusted:
+              ${sign}
+              ${t.difference.toFixed(2)}
+              ইউনিট
+            </small>
+
+          </td>
+
+          <td></td>
+
+          <td></td>
+
+          <td class="right">
+
+            <strong>
+              ${t.subUnits.toFixed(2)}
+            </strong>
+
+          </td>
+
+          <td class="right">
+
+            <strong>
+              ৳ ${t.amount.toFixed(2)}
+            </strong>
+
+          </td>
+
+        </tr>
+
+        `;
+
+      }).join("") +
+
+      `
+
+      <tr style="
+        background:linear-gradient(
+        135deg,
+        #0f766e,
+        #14b8a6
+        );
+        color:white;
+      ">
+
+        <td colspan="6">
+
+          <strong>
+            সর্বমোট
+          </strong>
+
+        </td>
+
+        <td class="right">
+
+          <strong>
+            ${grand.units.toFixed(2)}
+          </strong>
+
+        </td>
+
+        <td class="right">
+
+          <strong>
+            ৳ ${grand.amount.toFixed(2)}
+          </strong>
+
+        </td>
+
+      </tr>
+
+      `;
+
+      getInput("grandUnits").innerText =
+      grand.units.toFixed(2);
+
+      getInput("grandAmount").innerText =
+      "৳ " + grand.amount.toFixed(2);
+    }
+
+    function buildInvoiceSubUnitSection(
+      rowsPart,
+      sectionTitle
+    ){
+
+      if(!rowsPart.length){
+
+        return "";
+      }
+
+      let sumFinal = 0;
+      let sumAmt = 0;
+
+      for(let s=0;s<rowsPart.length;s++){
+
+        sumFinal +=
+        rowsPart[s].finalUnits;
+
+        sumAmt +=
+        rowsPart[s].amount;
+      }
+
+      const body =
+      rowsPart.map(function(r){
+
+        const sign =
+        r.adjustment >= 0
+        ? "+"
+        : "";
+
+        return `
+
+                <tr>
+
+                  <td>
+
+                    ${r.roomNumber}
+
+                  </td>
+
+                  <td class="right">
+
+                    ${r.originalUnits.toFixed(2)}
+
+                  </td>
+
+                  <td class="right">
+
+                    ${sign}
+                    ${r.adjustment.toFixed(2)}
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ${r.finalUnits.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ৳ ${r.amount.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                </tr>
+
+                `;
+
+      }).join("");
+
+      return `
+
+          <div class="invoice-sub-section">
+
+            <h4 class="invoice-sub-section-title">
+
+              ${sectionTitle}
+
+            </h4>
+
+            <table class="invoice-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Room
+                  </th>
+
+                  <th class="right">
+                    Original
+                  </th>
+
+                  <th class="right">
+                    Adjust
+                  </th>
+
+                  <th class="right">
+                    Final
+                  </th>
+
+                  <th class="right">
+                    Amount
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                ${body}
+
+              </tbody>
+
+              <tfoot>
+
+                <tr>
+
+                  <td colspan="3">
+
+                    <strong>
+                      এই সাবের মোট
+                    </strong>
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ${sumFinal.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ৳ ${sumAmt.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                </tr>
+
+              </tfoot>
+
+            </table>
+
+          </div>
+
+          `;
+    }
+
+    function buildPrintGroupedResult(
+      rows,
+      mainTotals
+    ){
+
+      const printBox =
+      getInput("printGroupedResult");
+
+      let html = "";
+
+      const today = new Date();
+
+      const formattedDate =
+      today.toLocaleDateString(
+        "bn-BD",
+        {
+          year:"numeric",
+          month:"long",
+          day:"numeric"
+        }
+      );
+
+      for(let i=0;i<mainTotals.length;i++){
+
+        const total =
+        mainTotals[i];
+
+        const mainNo =
+        total.main;
+
+        const meterNumber =
+        total.meterNumber;
+
+        const mainRows =
+        rows.filter(function(r){
+
+          return r.main === mainNo;
+        });
+
+        let subOrder =
+        mainMeterSubs[mainNo];
+
+        if(
+          !subOrder ||
+          !subOrder.length
+        ){
+
+          subOrder =
+          [];
+
+          for(let si=0;si<mainRows.length;si++){
+
+            const suf =
+            mainRows[si].suffix;
+
+            if(
+              subOrder.indexOf(suf) === -1
+            ){
+
+              subOrder.push(suf);
+            }
+          }
+        }
+
+        const printSections =
+        subOrder.map(function(suf){
+
+          const part =
+          mainRows.filter(function(r){
+
+            return r.suffix === suf;
           });
 
-          const blob = await Packer.toBlob(doc);
-          const output = safeFileName(wordFileName.value, "converted-document") + ".docx";
-          downloadBlob(blob, output);
-
-          setStatus(
-            pdfStatus,
-            emptyPages > 0
-              ? "Word file downloaded. Some pages had no extractable text."
-              : "Word file downloaded successfully.",
-            emptyPages > 0 ? "warn" : "success"
+          return buildInvoiceSubUnitSection(
+            part,
+            "সাব ইউনিট " +
+            mainNo +
+            displaySuffix(suf) +
+            " — বিবরণ"
           );
-        } catch (err) {
-          console.error(err);
-          setStatus(pdfStatus, err.message || "Failed to create Word file.", "error");
-        } finally {
-          createWordBtn.disabled = false;
-        }
-      });
-    })();
+        }).join("");
+
+        html += `
+
+        <div class="invoice-wrapper">
+
+          <div class="invoice-header">
+
+            <div>
+
+              <h1>
+                ⚡ বিদ্যুৎ বিল ইনভয়েস
+              </h1>
+
+              <p>
+                Digital Sub Meter Billing System
+              </p>
+
+            </div>
+
+            <div class="invoice-meta">
+
+              <div>
+
+                <strong>
+                  Invoice Date:
+                </strong>
+
+                ${formattedDate}
+
+              </div>
+
+              <div>
+
+                <strong>
+                  Main Meter:
+                </strong>
+
+                ${mainNo}
+
+              </div>
+
+              <div>
+
+                <strong>
+                  Meter No:
+                </strong>
+
+                ${meterNumber}
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="invoice-info">
+
+            <div class="info-box">
+
+              <h4>
+                বিল তথ্য
+              </h4>
+
+              <p>
+                Main Meter:
+                <strong>
+                  ${mainNo}
+                </strong>
+              </p>
+
+              <p>
+                Meter Number:
+                <strong>
+                  ${meterNumber}
+                </strong>
+              </p>
+
+            </div>
+
+            <div class="info-box">
+
+              <h4>
+                Summary
+              </h4>
+
+              <p>
+                Total Unit:
+                <strong>
+                  ${total.subUnits.toFixed(2)}
+                </strong>
+              </p>
+
+              <p>
+                Total Amount:
+                <strong>
+                  ৳ ${total.amount.toFixed(2)}
+                </strong>
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="invoice-sub-sections">
+
+            ${printSections}
+
+          </div>
+
+          <div class="invoice-main-total-wrap">
+
+            <table class="invoice-table">
+
+              <tbody>
+
+                <tr>
+
+                  <td colspan="3">
+
+                    <strong>
+                      মেইন মিটার সর্বমোট (সকল সাব)
+                    </strong>
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ${total.subUnits.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                  <td class="right">
+
+                    <strong>
+                      ৳ ${total.amount.toFixed(2)}
+                    </strong>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div class="invoice-footer">
+
+            <div>
+
+              <p>
+                এই বিলটি স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে।
+              </p>
+
+              <p>
+                Developed by Ashikur Rahman (GitHub: <a href="https://github.com/ashikurrahman1223" target="_blank">https://github.com/ashikurrahman1223</a>)
+              </p>
+
+            </div>
+
+            <div class="signature-box">
+
+              <div class="signature-line"></div>
+
+              <p>
+                Authorized Signature
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        `;
+      }
+
+      printBox.innerHTML = html;
+    }
+
+    function printA4DigitalBill(){
+
+      if(!lastCalculatedData){
+
+        showWarning(
+          "প্রথমে বিল হিসাব করুন।"
+        );
+
+        return;
+      }
+
+      window.print();
+    }
+
+    function clearResult(){
+
+      getInput("resultBox").style.display =
+      "none";
+
+      getInput("resultRows").innerHTML = "";
+
+      getInput("resultTotals").innerHTML = "";
+
+      getInput("printGroupedResult").innerHTML =
+      "";
+
+      lastCalculatedData = null;
+    }
+
+    function resetForm(){
+
+      getInput("metersContainer").innerHTML =
+      "";
+
+      meterCount = 0;
+
+      activeMeters = [];
+
+      mainMeterSubs = {};
+
+      clearResult();
+
+      clearWarning();
+
+      addMainMeter();
+    }
+
+    window.onload = function(){
+
+      addMainMeter();
+    };
+
   </script>
+
 </body>
 </html>
